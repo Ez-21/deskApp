@@ -1,0 +1,123 @@
+.box {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  overflow-y: scroll;
+  background: url("../../assets/wallpaper.png") round;
+}
+.content{
+  display: flex;
+  width: 1240px;
+  height: 732px;
+  .left{
+    box-sizing: border-box;
+    padding: 16px;
+    width:274px;
+    height: 100%;
+    background: #0F0F0F;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    overflow-y: scroll;
+    .bar{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      img{
+        width: 12px;
+        height: 12px;
+        cursor: pointer;
+      }
+    }
+    .msgCard{
+      box-sizing: border-box;
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      height: 44px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.45);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+    }
+  }
+  .right{
+    position: relative;
+    box-sizing: border-box;
+    padding: 24px 24px 50px 24px;
+    width: 966px;
+    height: 100%;
+    overflow-y: scroll;
+    background: #0C0C0C;
+    color: rgba(255, 255, 255, 0.85);
+    .footer{
+      position: fixed;
+      bottom: 40px;
+      right: 48px;
+      box-sizing: border-box;
+      width: 100%;
+      width: 918px;
+    }
+    .sendBox{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding: 16px;
+      top: calc(100% - 50px);
+      right: 48px;
+      border: 1px dashed #ccc;
+      background: #1D1D1D;
+      z-index: 1;
+      input{
+        width: 75%;
+        outline: none;
+        border: none;
+        // background: rgba(255, 255, 255, 0.04);
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      img{
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+      }
+    }
+    .flexL{
+      display: flex;
+      justify-content: flex-start;
+      .flexLcon{
+        display: flex;
+        justify-content: flex-start;
+        align-items: self-start;
+        margin-bottom: 21px;
+      }
+    }
+    .flexR{
+      display: flex;
+      flex-direction: row-reverse;
+      .flexRcon{
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: self-start;
+        margin-bottom: 21px;
+      }
+    }
+    .headPic{
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+    .msg{
+      margin: 0 16px;
+      box-sizing: border-box;
+      padding: 12px;
+      width: 304px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}

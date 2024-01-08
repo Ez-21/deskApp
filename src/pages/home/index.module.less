@@ -1,0 +1,229 @@
+.box {
+  height: 100%;
+  overflow-y: scroll;
+  background: url("../../assets/wallpaper.png") round;
+}
+.readContent{
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  color: white;
+  div {
+    margin-left: 9px;
+  }
+}
+.creatModalBox{
+  width: 700px;
+  z-index: 1000;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  background: #161616;
+}
+.createTaskBox {
+  position: relative;
+  //width: 1277px;
+  height: 448px;
+  background: #161616;;
+  box-sizing: border-box;
+  .taskBoxTitle {
+    font-family: AlibabaPuHuiTi;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: inset 0px -1px 0px 0px rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    img {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+  }
+  .changeName{
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 14px;
+    input{
+      margin-left: 10px;
+      box-sizing: border-box;
+      padding: 5px 12px;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #161616;
+      border-radius: 2px
+    }
+  }
+  .fileListTitle{
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.65);
+    font-size:14px;
+    :last-child{
+      display: flex;
+      .setPath{
+        color: #1755FF;
+        cursor: pointer;
+      }
+    }
+  }
+  .fileList{
+    box-sizing: border-box;
+    padding: 16px 16px 30px 16px;
+    overflow: hidden;
+    .fileItem{
+      padding: 16px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.01);
+      box-sizing: border-box;
+      overflow-y: scroll;
+      height: 202px;
+      /* White/4% */
+      .fileBox{
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.04);
+        margin-bottom: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        div{
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+  .footer{
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding:0  24px;
+    height: 56px;
+    box-shadow: inset 0px 1px 0px 0px rgba(240, 240, 240, 0.2);
+    div{
+      display: flex;
+      align-items: center;
+      div{
+        padding: 5px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      .cancel{
+        margin-right: 8px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .create{
+        color: white;
+        box-sizing: border-box;
+        border: 1px solid #1755FF;
+        background: #1755FF;
+      }
+    }
+  }
+}
+
+.content {
+  padding: 40px 0 80px 24px;
+  box-sizing: border-box;
+
+  .title {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+
+    .circle {
+      margin-left: 8px;
+      display: grid;
+      place-items: center;
+      padding: 2px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .flexBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .listBox {
+    margin-top: 16px;
+    //display: flex;
+    //flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 16px;
+    //scroll-behavior: smooth;
+    > div {
+      cursor: pointer;
+      //margin-right: 16px;
+      //margin-bottom: 16px;
+      width: 298px;
+      height: 122px;
+      border-radius: 8px;
+    }
+
+    .createBox {
+      .flexBox();
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background-color: black;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+
+      img {
+        width: 22.5px;
+        height: 22.5px;
+        margin-bottom: 15px;
+      }
+    }
+
+    .taskBox {
+      box-sizing: border-box;
+      padding: 16px;
+      background: #0C0C0C;
+
+      .titleBox {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+
+        img {
+          width: 25px;
+          height: 25px;
+        }
+      }
+
+      .createTime {
+        margin-top: 16px;
+        margin-bottom: 22px;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.45);
+
+        /deep/ .ant-progress-text {
+          color: white !important;
+        }
+      }
+    }
+  }
+}

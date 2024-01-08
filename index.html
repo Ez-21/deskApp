@@ -1,0 +1,98 @@
+<!--
+ * @Author: Ez-21 2275862144@qq.com
+ * @Date: 2023-12-02 02:53:32
+ * @LastEditors: Ez-21 2275862144@qq.com
+ * @LastEditTime: 2024-01-04 12:29:09
+ * @FilePath: \quick\index.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri + React</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    /*修改antd组件库样式*/
+    .ant-progress-text {
+        color: white !important;
+    }
+
+    /* 设置滚动条的轨道样式 */
+    ::-webkit-scrollbar {
+        width: 2px;
+        /* 设置滚动条的宽度 */
+    }
+
+    ::-webkit-scrollbar:horizontal {
+        width: 2px;
+    }
+
+    /* 设置滚动条的滑块样式 */
+    ::-webkit-scrollbar-thumb {
+        background-color: #666;
+        /* 设置滑块的背景颜色 */
+        border-radius: 4px;
+        /* 设置滑块的圆角 */
+    }
+
+    /* 设置滚动条的滑道样式 */
+    ::-webkit-scrollbar-track {
+        background-color: #f5f5f5;
+        /* 设置滑道的背景颜色 */
+    }
+
+    .ant-collapse {
+        border: none !important;
+        background: rgba(255, 255, 255, 0.02);
+        padding: unset !important;
+        height: unset !important;
+    }
+
+    .ant-collapse-item {
+        border-bottom: none !important;
+    }
+
+    .ant-collapse-header {
+        align-items: center !important;
+    }
+
+    .ant-collapse-content {
+        background: #131313 !important;
+    }
+
+    .ant-tabs-nav {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .ant-tabs-nav::before {
+        border: unset !important;
+    }
+
+    .ant-table-thead {
+        border-color: rgba(255, 255, 255, 0.04) !important;
+
+        .ant-table-cell {
+            border-color: rgba(255, 255, 255, 0.04) !important;
+        }
+    }
+
+    tr {
+        background: none !important;
+    }
+</style>

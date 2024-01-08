@@ -1,0 +1,335 @@
+.box {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  background: url("../../assets/wallpaper.png") round;
+  color: white;
+  overflow-y: scroll;
+}
+
+.titleBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+  div {
+    margin-left: 9px;
+  }
+}
+
+.content {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+
+  .userInfo {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #070707;
+    //border-bottom: 1px solid #0C0C0C;
+    .headimgurl {
+      margin-right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+    }
+
+    .user {
+      display: flex;
+      justify-content: center;
+      cursor: pointer;
+
+      .userMsg {
+        :first-child {
+          display: flex;
+          align-items: center;
+          font-size: 24px;
+          .userStatus {
+            margin-left: 8px;
+            display: grid;
+            place-items: center;
+            padding: 2px 8px;
+            font-size: 12px;
+            box-sizing: border-box;
+            color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.02);
+            //border: 1px solid rgba(255, 255, 255, 0.16);
+            /* White/20% */
+            border: 2px solid rgba(255, 255, 255, 0.2);
+          }
+
+          .userStatusEd {
+            margin-left: 8px;
+            font-size: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(90deg, #FFEFB6 0%, #FFD076 100%);
+            border-radius: 77px;
+            padding: 2px 16px;
+            color: #884E1A;
+
+          }
+        }
+
+        :last-child {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.65);
+        }
+      }
+    }
+
+    .topBtn {
+      width: 112px;
+      height: 40px;
+      text-align: center;
+      line-height: 40px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    .get {
+      .topBtn();
+      background: linear-gradient(109deg, #FFF3BF 0%, #FFCD70 100%);
+      color: #884E1A;
+    }
+
+    .goLogin {
+      .topBtn();
+      background: #1755FF;
+      color: white;
+    }
+  }
+
+  .balance {
+    display: flex;
+    padding: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: #070707;
+    img {
+      width: 39.8px;
+      height: 39.8px;
+    }
+    .lostMone {
+      margin-left: 16px;
+      :last-child {
+        font-size: 36px;
+      }
+    }
+  }
+
+  .recharge {
+    padding: 24px 24px 120px 24px;
+    background: #070707;
+    .recharTitle {
+      padding: 24px 0;
+      display: flex;
+      align-items: center;
+    }
+    img {
+      margin-right: 16px;
+      width: 39.8px;
+      height: 39.8px;
+    }
+    .moneyItem {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      place-items: center;
+      grid-gap: 24px;
+
+      .itemBox {
+        text-align: center;
+        width: 280px;
+        height: 123px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 8px;
+        cursor: pointer;
+
+        .itemNumber {
+          padding: 23.5px 0;
+          font-size: 24px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        :last-child {
+          margin-top: 10px;
+          color: rgba(255, 255, 255, 0.45);
+        }
+      }
+    }
+  }
+}
+
+.titleTop {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+}
+
+.payModal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  padding: 24px;
+  width: 462px;
+  //height: 434px;
+  background: #161616;
+  border-radius: 16px;
+  .payConent {
+    width: 100%;
+    padding: 24px;
+    background:#1F1F1F;
+    border-radius: 8px;
+    box-sizing:border-box !important;
+    > div {
+      margin-bottom: 24px;
+    }
+
+    .flexM {
+      :first-child {
+        color: rgba(255, 255, 255, 0.65);
+        margin-right: 18px;
+      }
+
+      display: flex;
+      align-items: center;
+    }
+
+    .one {
+      .flexM();
+      font-size: 14px;
+    }
+
+    .two {
+      display: flex;
+      align-items: center;
+
+      :first-child {
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      :last-child {
+        font-size: 24px;
+
+        span {
+          font-size: 14px;
+        }
+      }
+
+    }
+
+    .three {
+      display: flex;
+      .payWay {
+        display: flex;
+        text-align: center;
+        img {
+          width: 88px;
+          height: 32px;
+          object-fit: contain;
+        }
+        > div > div {
+          border-radius: 4px;
+          display: grid;
+          place-items: center;
+          width: 140px;
+          height: 140px;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .btn {
+          margin-top: 16px;
+          width: 100%;
+          height: 32px;
+          line-height: 32px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .payBtn1 {
+          .btn();
+          background: #1890FF;
+          border: 1px solid #1890FF;
+
+        }
+
+        .payBtn2 {
+          .btn();
+          background: #00B700;
+          border: 1px solid #00B700;
+        }
+      }
+    }
+  }
+}
+
+.getModal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  padding: 24px;
+  width: 416px;
+  height: 246px;
+  //background: #161616;
+  background: #000000;
+  border-radius: 16px;
+
+  .getContent {
+    box-sizing: border-box;
+    padding: 24px;
+    width: 100%;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+
+    input {
+      margin-bottom: 24px;
+      width: 100%;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .getBtn {
+      margin: 0 auto;
+      width: 148px;
+      height: 38px;
+      text-align: center;
+      line-height: 38px;
+      background: linear-gradient(270deg, #FFCD70 0%, #FFF3BF 100%);
+      font-size: 14px;
+      color: #884E1A;
+      border-radius: 40px;
+      cursor: pointer;
+    }
+  }
+}
+.quit{
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 252, 0.04);
+  cursor: pointer;
+  img{
+    width: 16px;
+    height: 16px;
+  }
+}

@@ -1,0 +1,385 @@
+{
+    "code": 200,
+    "msg": "",
+    "data": {
+        "draftList": [
+            {
+                "draftId": "0b96099d-5ce8-47e7-a4cb-a7837df83c8d",
+                "storyboardList": [
+                    {
+                        "id": "9971233e-f36f-4cdb-84a6-b37e5c25e033",
+                        "reverseInferencePromptWords": "blurry,no humans,letterboxed,torii"
+                    },
+                    {
+                        "id": "6dfb9eb9-3294-470a-ba31-71eb40530242",
+                        "reverseInferencePromptWords": "1girl,english text"
+                    },
+                    {
+                        "id": "ea53e352-c150-464b-aa55-9eeeebf32429",
+                        "reverseInferencePromptWords": "solo,letterboxed"
+                    },
+                    {
+                        "id": "d10217af-0417-4100-a3fb-9b3ff006fc80",
+                        "reverseInferencePromptWords": "solo,short hair,shirt,black hair,1boy,closed eyes,male focus,blurry,blurry background,crying,letterboxed"
+                    },
+                    {
+                        "id": "114267a1-65ea-4799-b401-486d026c6937",
+                        "reverseInferencePromptWords": "multiple girls,multiple boys,6+boys,crowd,glowstick"
+                    },
+                    {
+                        "id": "efc44cb9-9a45-4d3c-8094-1fa499a02518",
+                        "reverseInferencePromptWords": "monochrome,greyscale"
+                    },
+                    {
+                        "id": "5560473c-ec1e-4eba-8ba1-b1c928c57f03",
+                        "reverseInferencePromptWords": "monochrome,greyscale,grey background,no humans,logo"
+                    },
+                    {
+                        "id": "f9312675-8dd6-431c-b0f3-ef9ef10a41f7",
+                        "reverseInferencePromptWords": "smile,open mouth,multiple girls,shirt,black hair,holding,multiple boys,realistic,crowd,glowstick"
+                    },
+                    {
+                        "id": "15677bb6-040c-44ad-ab96-6b01fd477d7a",
+                        "reverseInferencePromptWords": "multiple girls,multiple boys"
+                    },
+                    {
+                        "id": "b9c96c4e-2f80-49f0-a238-7a0f76569873",
+                        "reverseInferencePromptWords": "1girl,solo,star (sky)"
+                    },
+                    {
+                        "id": "5deacf11-f798-47f6-b1b9-d0b6072d29d3",
+                        "reverseInferencePromptWords": "solo,shirt,1boy,male focus,reflection"
+                    },
+                    {
+                        "id": "b487936e-18d1-4a87-af3e-e32af7e07535",
+                        "reverseInferencePromptWords": "multiple boys,parody,6+boys"
+                    },
+                    {
+                        "id": "02408113-cc09-44b6-8a06-bbd188e4ac58",
+                        "reverseInferencePromptWords": "no humans,scenery,neon lights"
+                    },
+                    {
+                        "id": "0e73b577-f760-413f-a59c-366a7baad716",
+                        "reverseInferencePromptWords": "shirt,black hair,1boy,white shirt,male focus,multiple boys,collared shirt,striped shirt"
+                    },
+                    {
+                        "id": "2bb90892-e520-4606-8c6d-6e358eeb70ef",
+                        "reverseInferencePromptWords": "1girl,solo,black hair,sitting,computer"
+                    },
+                    {
+                        "id": "b7db8fd7-1308-440c-9eff-234056b548b7",
+                        "reverseInferencePromptWords": "shirt,black hair,white shirt,male focus,multiple boys,2boys,letterboxed,microphone,music,ikari shinji"
+                    },
+                    {
+                        "id": "4249ea83-78f3-485a-ba1a-d813a28d5c07",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,holding,white shirt,male focus,microphone,holding microphone"
+                    },
+                    {
+                        "id": "90efc0d3-db26-4ec8-a975-01517d344fe5",
+                        "reverseInferencePromptWords": ""
+                    },
+                    {
+                        "id": "db1a3bf4-4334-4c89-9f92-da183f122638",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,holding,white shirt,upper body,male focus,white jacket,microphone,holding microphone,white suit"
+                    },
+                    {
+                        "id": "27887d77-8331-43e3-85e6-b4c1483c7d81",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,holding,male focus,tears,profile,letterboxed,microphone,realistic,music"
+                    },
+                    {
+                        "id": "cf886b34-09e7-4d24-be53-cece8a397a85",
+                        "reverseInferencePromptWords": "multiple girls,flower,multiple boys,glasses,6+boys,bouquet"
+                    },
+                    {
+                        "id": "a2e2343e-559e-4ab2-9871-13d708b5d513",
+                        "reverseInferencePromptWords": "solo,science fiction"
+                    },
+                    {
+                        "id": "cb91de8c-13c9-4189-b6a3-c3a89ee8f186",
+                        "reverseInferencePromptWords": "monochrome,greyscale,no humans"
+                    },
+                    {
+                        "id": "9064f4c2-c1d2-4767-91c6-357d11f50190",
+                        "reverseInferencePromptWords": "black hair,male focus,multiple boys,indoors"
+                    },
+                    {
+                        "id": "8c761a92-0a75-4db7-a288-4adc13938c03",
+                        "reverseInferencePromptWords": "solo,short hair,black hair,1boy,male focus,space,fake screenshot"
+                    },
+                    {
+                        "id": "ebd54947-7714-4241-bcfa-8eb04dd41e23",
+                        "reverseInferencePromptWords": "male focus,multiple boys,night,police"
+                    },
+                    {
+                        "id": "34e591ca-c668-4247-8968-62501b94d9c8",
+                        "reverseInferencePromptWords": "no humans"
+                    },
+                    {
+                        "id": "066e2bc2-3720-487a-823d-6d94b79ee444",
+                        "reverseInferencePromptWords": "no humans"
+                    },
+                    {
+                        "id": "b72ef94e-9f33-44f4-bee3-c2fcaf33e9c1",
+                        "reverseInferencePromptWords": "1boy"
+                    },
+                    {
+                        "id": "f89096cc-cd08-4edf-9837-07c2d7b3c1c7",
+                        "reverseInferencePromptWords": "hat,multiple boys,6+boys"
+                    },
+                    {
+                        "id": "b02ac493-c7e9-4a34-9207-0368c549da01",
+                        "reverseInferencePromptWords": "black hair,holding,male focus,multiple boys,microphone,music,holding microphone"
+                    },
+                    {
+                        "id": "3522f801-900e-4650-aca5-d88ac9ba56fb",
+                        "reverseInferencePromptWords": "no humans"
+                    },
+                    {
+                        "id": "a1f49ea3-a4f9-457f-905c-2c8cff3b2b9c",
+                        "reverseInferencePromptWords": "multiple girls,multiple boys,6+girls,6+boys"
+                    },
+                    {
+                        "id": "6345d529-c4f4-4c9d-9dd7-86129fe8920b",
+                        "reverseInferencePromptWords": "1girl,long hair,looking at viewer,black hair,closed eyes,mask,realistic,mouth mask,surgical mask,reference inset,white mask"
+                    },
+                    {
+                        "id": "1c1b6aea-493b-4ac2-9859-b9ff43443bc7",
+                        "reverseInferencePromptWords": "solo,1boy,holding,male focus,microphone,silhouette,holding microphone,stage,spotlight,stage lights,concert"
+                    },
+                    {
+                        "id": "31c1ddc8-b2f4-4feb-9fa1-9d062d0af347",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,white shirt,male focus,outstretched arms,letterboxed,microphone,holding microphone"
+                    },
+                    {
+                        "id": "3e6bb158-f9df-4126-9cb4-bbc13d45fdad",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,male focus,facial hair,realistic"
+                    },
+                    {
+                        "id": "a000de49-01b8-4a42-a3cd-71b8ed28ab0d",
+                        "reverseInferencePromptWords": "letterboxed,scenery"
+                    },
+                    {
+                        "id": "3d05c2c4-edc2-40ad-b49b-f7732e6aabbb",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,male focus,japanese clothes,kimono"
+                    },
+                    {
+                        "id": "fcae7c6c-4b1c-462f-ae59-c575a21ff156",
+                        "reverseInferencePromptWords": "multiple girls,multiple boys,6+boys"
+                    },
+                    {
+                        "id": "e54712cd-5b48-4c5d-8515-9e401775d02d",
+                        "reverseInferencePromptWords": "short hair,shirt,black hair,multiple boys,2boys,realistic,baby"
+                    },
+                    {
+                        "id": "7c5828f6-d984-4e1d-ac97-fd9942f37439",
+                        "reverseInferencePromptWords": "black hair,male focus,multiple boys,2boys,hug,blood"
+                    },
+                    {
+                        "id": "8bb59f70-25ca-44e0-ad9d-a1c3de201c5d",
+                        "reverseInferencePromptWords": "1girl,short hair,shirt,black hair,holding,glasses,solo focus,blurry,microphone,realistic,holding microphone,crowd,audience"
+                    },
+                    {
+                        "id": "caade5d6-1e15-4cbb-9d73-c43c8471f472",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,male focus,microphone,realistic"
+                    },
+                    {
+                        "id": "f75b3260-395d-4808-8792-c9fe4d9ef4fc",
+                        "reverseInferencePromptWords": "1girl,short hair,shirt,black hair,holding,white shirt,parted lips,glasses,solo focus,collared shirt,blurry,lips,blurry background,letterboxed,microphone,black-framed eyewear,realistic,holding microphone,crowd,glowstick,audience"
+                    },
+                    {
+                        "id": "d1a8ad31-bcbd-4659-9899-e1c1e5dd201c",
+                        "reverseInferencePromptWords": "solo,shirt,1boy,jewelry,male focus,arms up,bracelet,open shirt,instrument,red background,realistic,guitar"
+                    },
+                    {
+                        "id": "c0a73635-1602-4d43-b812-588cfbeb377b",
+                        "reverseInferencePromptWords": "shirt,black hair,1boy,black shirt,photo background"
+                    },
+                    {
+                        "id": "71ba2270-3c26-4631-ace3-08539611107e",
+                        "reverseInferencePromptWords": "1girl,solo,long hair,looking at viewer,brown hair,jewelry,earrings,outdoors,glasses,bracelet"
+                    },
+                    {
+                        "id": "77a1ed83-e785-4f0a-bd82-d83019526e26",
+                        "reverseInferencePromptWords": "1girl,long hair,shirt,black hair,1boy,jewelry,glasses,necklace,bag,black shirt,backpack,realistic,bra strap,photo background"
+                    },
+                    {
+                        "id": "97178e2f-699a-4a04-ac2d-79310bbd2782",
+                        "reverseInferencePromptWords": "1boy,male focus,glasses"
+                    },
+                    {
+                        "id": "c248e345-a23f-4dc0-895f-8b2855d07f54",
+                        "reverseInferencePromptWords": "long hair,smile,multiple girls,black hair,2girls,jewelry,earrings,teeth,necklace,grin,cross,realistic,cross earrings,real life insert"
+                    },
+                    {
+                        "id": "58f230de-8ea6-449d-b9bd-f1147c6701ec",
+                        "reverseInferencePromptWords": "smile,multiple girls,brown hair,shirt,black hair,white shirt,outdoors,multiple boys,teeth,day,letterboxed,ground vehicle,t-shirt,building,motor vehicle,city,realistic,road,motorcycle,street"
+                    },
+                    {
+                        "id": "b0a9a412-22b9-4618-9bf5-1f2cdd236347",
+                        "reverseInferencePromptWords": "long hair,looking at viewer,smile,shirt,black hair,white shirt,outdoors,multiple boys,glasses,teeth,bag,grin,tree,backpack,realistic,fat,fat man,photo background"
+                    },
+                    {
+                        "id": "d7127610-605d-488f-829e-e2612235748b",
+                        "reverseInferencePromptWords": "1girl,solo,long hair,glasses,realistic,round eyewear"
+                    },
+                    {
+                        "id": "3c980326-bda7-4b2d-9e55-804bc6f4b071",
+                        "reverseInferencePromptWords": "monochrome,greyscale,umbrella,letterboxed"
+                    },
+                    {
+                        "id": "bd5821e5-679a-485d-993d-572c9ef80527",
+                        "reverseInferencePromptWords": "holding,monochrome,greyscale,multiple boys,phone,dark"
+                    },
+                    {
+                        "id": "4d7bdbbb-692c-4224-b9ea-1fc860c8f915",
+                        "reverseInferencePromptWords": "solo,black hair,long sleeves,1boy,jacket,monochrome,male focus"
+                    },
+                    {
+                        "id": "6b145064-7b84-4c59-8b35-c0d371bd3d14",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,jacket,male focus,open clothes,from side,black jacket,letterboxed,red shirt"
+                    },
+                    {
+                        "id": "c3ce9d6a-b0f6-45a2-994c-769e89cfb457",
+                        "reverseInferencePromptWords": "shirt,black hair,white shirt,multiple boys,letterboxed,drinking"
+                    },
+                    {
+                        "id": "e841b375-4558-43f8-943c-d3aa61e4d376",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,jewelry,male focus,open clothes,belt,necklace,open shirt,instrument"
+                    },
+                    {
+                        "id": "696debf9-a248-4e01-ba6b-a1f48b03ea3b",
+                        "reverseInferencePromptWords": "solo,blonde hair,shirt,1boy,holding,male focus,paper"
+                    },
+                    {
+                        "id": "942de035-34bc-422b-b55d-622b35f4ed04",
+                        "reverseInferencePromptWords": "short hair,shirt,black hair,1boy,holding,sitting,white shirt,male focus,cup,chair,phone,table"
+                    },
+                    {
+                        "id": "0258d66b-1ce7-4df7-9111-cd85d2237f47",
+                        "reverseInferencePromptWords": "multiple girls,black hair,multiple boys,6+boys"
+                    },
+                    {
+                        "id": "2c0dfe0f-05cd-44ba-909a-239a08a8229d",
+                        "reverseInferencePromptWords": "shirt,black hair,hat,multiple boys,mask,6+boys"
+                    },
+                    {
+                        "id": "3c09812f-ef06-429e-968d-b5ac9851da03",
+                        "reverseInferencePromptWords": "1girl,solo,letterboxed,danmaku"
+                    },
+                    {
+                        "id": "5a06dda6-16b7-4dc4-b37a-390ee55bb564",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,holding,white shirt,male focus,from side,black background,paper,music,drinking"
+                    },
+                    {
+                        "id": "fcba7df3-f18d-4ecf-bce9-9ef82f8e90af",
+                        "reverseInferencePromptWords": "solo,short hair,black hair,1boy,male focus,umbrella,letterboxed,fake screenshot"
+                    },
+                    {
+                        "id": "974e287c-b2dd-4d55-a0ba-fc006dcd96a4",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,male focus,letterboxed,instrument,microphone,music,guitar"
+                    },
+                    {
+                        "id": "1ed3ebbc-9c90-4381-8805-13c02b84a8b8",
+                        "reverseInferencePromptWords": "hat,holding,multiple boys,phone,cellphone"
+                    },
+                    {
+                        "id": "c32c29f9-480c-4f44-b0c5-937de5c4a177",
+                        "reverseInferencePromptWords": "shirt,holding,multiple boys,mask,phone,cellphone,smartphone,holding phone,mouth mask"
+                    },
+                    {
+                        "id": "3aeb833c-56b0-4155-9a2f-b8550fbb7aeb",
+                        "reverseInferencePromptWords": "long hair,sitting,indoors"
+                    },
+                    {
+                        "id": "487e5772-c2e2-47a6-a91e-b7885b190713",
+                        "reverseInferencePromptWords": "1girl,open mouth,shirt,black hair,teeth,tongue,realistic"
+                    },
+                    {
+                        "id": "6466f866-47be-4e5d-b477-d8296fd32284",
+                        "reverseInferencePromptWords": "1girl,black hair,holding,phone,realistic"
+                    },
+                    {
+                        "id": "a8fc5be5-2e98-4534-8e38-2101adf678b2",
+                        "reverseInferencePromptWords": "solo,1boy,male focus,glasses,round eyewear"
+                    },
+                    {
+                        "id": "5b566752-4b09-4d34-9b0a-fdf7b10fbdce",
+                        "reverseInferencePromptWords": "black hair,male focus,multiple boys,2boys,letterboxed"
+                    },
+                    {
+                        "id": "bff5202c-2ec8-44f7-8704-8587e2d0a43b",
+                        "reverseInferencePromptWords": "black hair,male focus,multiple boys,2boys,from behind,vest,fake screenshot"
+                    },
+                    {
+                        "id": "7fdc7e97-3413-4a6f-95d8-b739492ee646",
+                        "reverseInferencePromptWords": "1girl,solo,blurry,letterboxed"
+                    },
+                    {
+                        "id": "e1a42874-413f-4c76-a0a9-30b08aab6368",
+                        "reverseInferencePromptWords": "solo,shirt,1boy,holding,closed eyes,upper body,male focus,blurry,depth of field,blurry background,letterboxed,microphone,music,holding microphone"
+                    },
+                    {
+                        "id": "2f687269-336c-4030-bded-112673c630e2",
+                        "reverseInferencePromptWords": "solo,1boy,male focus,letterboxed"
+                    },
+                    {
+                        "id": "c25d422b-b5b4-4634-85e9-eb8a8d78768c",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,jewelry,male focus,necklace"
+                    },
+                    {
+                        "id": "5acc115d-f5f3-4ec2-bbdb-2aa9a7be3eb3",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,male focus,realistic,earphones,earbuds"
+                    },
+                    {
+                        "id": "74ca0fb0-863e-4807-b2dd-5ed1dd7e8a08",
+                        "reverseInferencePromptWords": "1girl,long hair,black hair,monochrome,solo focus,tears,blurry,depth of field,blurry background,letterboxed,covering mouth,bokeh"
+                    },
+                    {
+                        "id": "a76f8ec2-18c6-49bc-82f5-2fd1236ddcf1",
+                        "reverseInferencePromptWords": "1girl,long hair,black hair,hair ornament,holding,jewelry,closed eyes,braid,solo focus,blurry,bracelet,flute"
+                    },
+                    {
+                        "id": "5a16af4e-a8a3-4a7d-86cd-27d566f923fe",
+                        "reverseInferencePromptWords": "1girl,solo,black hair,closed eyes,letterboxed,realistic"
+                    },
+                    {
+                        "id": "9cb95110-678a-4347-800f-b952547a566c",
+                        "reverseInferencePromptWords": "solo,black hair,1boy,jacket,male focus,microphone,snow"
+                    },
+                    {
+                        "id": "23cec7a2-d17f-445e-aa12-6e81329d0ca8",
+                        "reverseInferencePromptWords": "solo,shirt,black hair,1boy,jacket,male focus,microphone,realistic"
+                    },
+                    {
+                        "id": "57a49a1c-77d6-4d1d-91ad-16ca222b5fdf",
+                        "reverseInferencePromptWords": "solo,1boy,male focus,from behind,letterboxed"
+                    },
+                    {
+                        "id": "a93ca17d-bca6-43fa-9644-1693c22ea2f4",
+                        "reverseInferencePromptWords": "solo,shirt,white shirt"
+                    },
+                    {
+                        "id": "6a706eac-5f77-428a-8f87-123876bfa954",
+                        "reverseInferencePromptWords": "solo,1boy,male focus,ground vehicle,motor vehicle,car"
+                    },
+                    {
+                        "id": "c1087972-2b26-46b6-963a-c9ad03329351",
+                        "reverseInferencePromptWords": "black hair,1boy,microphone,music,holding microphone,singing"
+                    },
+                    {
+                        "id": "2042a507-d606-4a96-a966-5d2d0b837d88",
+                        "reverseInferencePromptWords": "blurry,no humans,depth of field,letterboxed,bokeh"
+                    },
+                    {
+                        "id": "c3e81d90-fdd1-4808-bb46-4c9086c32108",
+                        "reverseInferencePromptWords": "solo,black hair,letterboxed,stage,lights"
+                    },
+                    {
+                        "id": "76f4eeb6-277f-4602-b3a0-2edb187a9d98",
+                        "reverseInferencePromptWords": "simple background,monochrome,greyscale,grey background,no humans,text focus"
+                    }
+                ]
+            }
+        ]
+    }
+}
