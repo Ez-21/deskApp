@@ -229,10 +229,9 @@ export default () => {
           state.value = false;
           state.progress = 100;
           setState({ ...state });
-          message.success("生图任务执行完毕");
+         return message.success("生图任务执行完毕");
         } else if (res.status == "ing") {
-          setState((data) => {
-            data.value = res.status == "ing" ? true : false;
+         return setState((data) => {
             data.progress = res.progress;
             data.target = detial.draftList.find((item) => {
               return item.storyboardList.map((val) => val.id == res.targetId);
@@ -242,10 +241,10 @@ export default () => {
         }
       },
       (rej) => {
+        console.log(rej,'rej')
         if (rej.status == "break") {
-          state.value = false;
+           state.value = false;
           setState({ ...state });
-          return message.info("任务已中断");
         }
       }
     );
@@ -540,9 +539,7 @@ export default () => {
   // 下一步
   const goNextStep = () => {
     // 抽取草稿任务ids
-    let draftIds = detial.draftList
-      .filter((item) => item.checked)
-      .map((item) => item.draftId);
+    let draftIds = detial.draftList .filter((item) => item.checked).map((item) => item.draftId);
     if (draftIds.length == 0) {
       return message.error("至少选择一条草稿任务！");
     }
@@ -672,9 +669,11 @@ export default () => {
   const stopCreate = () => {
     sessionStorage.setItem("breakStatus", "1");
     state.value = false;
-    setState({ ...state });
-    message.info("任务已中断!");
-    getDetial();
+    setState((res) => {
+      getDetial();
+      message.info("任务已中断!2");
+      return { ...res };
+    });
   };
   // 头部tabs
   const [tabsItem, setTabsItem] = useState([

@@ -10,6 +10,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import {RouterProvider} from "react-router-dom";
 import routes from './router/router.jsx'
+import 'element-theme-default';
 import WindowBar from '@/components/windowBar'
 document.addEventListener('contextmenu', (e) => {
     // return  e.preventDefault()

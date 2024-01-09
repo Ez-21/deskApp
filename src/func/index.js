@@ -112,50 +112,35 @@ function queeTask(data, fn) {
   // 进度值
   let progress = undefined;
 
-  return async function gen(res,rej) {
+  return async function gen(res, rej) {
     // 判断中止状态
     let breakStatus = sessionStorage.getItem("breakStatus");
     if (Boolean(+breakStatus)) {
       return rej({
         status: "break",
       });
-    }
-    // 任务执行完毕
-    if(targetNum==totalNum){
-      return  res({
-        status: "done",
-      })
-    }
-    if (targetNum < totalNum) {
-        // 设置当前执行的任务id
-        sessionStorage.setItem(
-          "stateData",
-          JSON.stringify({
-            targetId: value,
-          })
-        );
-        await fn(value);
-        ++targetNum;
-
-        value = data[targetNum - 1];
-        // 进度
-        progress = ((targetNum / totalNum) * 100).toFixed(2);
-        console.log(progress,'任务进度')
-        // 设置进度
-        // let targetId = JSON.parse(sessionStorage.getItem("stateData")).targetId;
-       gen(res,rej);
-       res({
-        status: "ing",
-        targetId:value,
-        progress,
-      }) 
-    } else {
-      return rej({
+    } else if (targetNum == totalNum) {
+      // 任务执行完毕
+      return res({
         status: "done",
       });
+    } else if (targetNum < totalNum) {
+      await fn(value);
+      ++targetNum;
+
+      value = data[targetNum - 1];
+      // 进度
+      progress = ((targetNum / totalNum) * 100).toFixed(2);
+      console.log(progress, "任务进度");
+      // 设置进度
+      gen(res, rej);
+      return res({
+        status: "ing",
+        targetId: value,
+        progress,
+      });
     }
-  }
-   ;
+  };
 }
 
 export {

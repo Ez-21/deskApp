@@ -1,3 +1,11 @@
+/*
+ * @Author: w-qianzz 2275862144@qq.com
+ * @Date: 2023-12-14 21:19:01
+ * @LastEditors: w-qianzz 2275862144@qq.com
+ * @LastEditTime: 2024-01-10 01:44:09
+ * @FilePath: \quick\src\pages\Step3_syntVideo\index.jsx
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import BackBar from "@/components/backBar";
 import style from "./index.module.less";
 import Next from "@/assets/next.png";
@@ -23,13 +31,15 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ReactSortable } from "react-sortablejs";
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import {
   getVideoProgress,
   generateVideo,
   getVoice,
   getVideoDetail,
   generateAudio,
+  generateAllFrame,
+  pushAloneVideoFrame,
 } from "@/api/api";
 const { Option } = Select;
 function getImageUrl(name) {
@@ -42,8 +52,8 @@ export default () => {
   const [showComp, setShowComp] = useState(1);
   const [detial, setDetial] = useState();
   const [show, setShow] = useState(false);
-  const [stepValue, setStepValue] = useState(20);
-  const [likeValue, setLikeValue] = useState(0.75);
+  const [paramsData, setParamsData] = useState(params.state);
+  var { draftIds, modelType } = params;
   const [voiceSetting, setVoiceSetting] = useState({
     soundModel: "",
     soundSpeed: "",
@@ -60,6 +70,26 @@ export default () => {
     voiceSetting.soundModel = e;
     setVoiceSetting({ ...voiceSetting });
   };
+  // 创建可排序的子项组件
+const SortableItem = SortableElement(({ value,index }) => (
+    <div className={style.leftItem} key={index}>
+    <div className={style.drag}>
+      <img src={getImageUrl("drg")} alt='' />
+    </div>
+    <div className={style.icon}>
+      <img src={getImageUrl("001")} alt='' />
+      {value.name}
+    </div>
+  </div>
+));
+// 创建可排序的父容器组件
+const SortableList = SortableContainer(({ items }) => (
+  <div>
+    {checkFrame&&checkFrame.map((value, index) => (
+      <SortableItem key={`item-${index}`} index={index} value={value} />
+    ))}
+  </div>
+));
   // 关键帧数据
   const [keyFramesList, setkeyFramesList] = useState([
     {
@@ -104,58 +134,59 @@ export default () => {
   const getVoiceHand = () => {
     getVoice().then((res) => {
       console.log(res, "音色数据");
+      setVoice(res.data.list);
     });
   };
-  const getDetial = (draftIds) => {
-    getVideoDetail({ draftIds, modelType: params.state.modelType }).then(
-      ({ data }) => {
-        data.draftList.forEach((element) => {
-          element.checked = false;
-          element.storyboardList.forEach((item) => {
-            item.spinning = false;
-            // 设置原图地址
-            item.orignImagePath = item.orignImagePath
-              .split("quick")[1]
-              .replaceAll("\\", "/");
-            // 设置仿图图片地址 sd为单张图  mj多张 所以进行数组判断
-            if (item.currentImageList && item.currentImageList.length != 0) {
-              if (Array.isArray(item.currentImageList)) {
-                item.currentImageList.forEach((val, index) => {
-                  item.currentImageList[index] = item.currentImageList[index]
-                    .split("quick")[1]
-                    .replaceAll("\\", "/");
-                });
-              } else {
-                item.currentImageList = item.currentImageList
-                  .split("quick")[1]
-                  .replaceAll("\\", "/");
-              }
-            }
-            // 设置历史记录图片地址
-            if (item.historyImageList && item.historyImageList.length != 0) {
-              item.historyImageList.forEach((val, index) => {
-                item.historyImageList[index] = item.historyImageList[index]
+
+  const getDetial = () => {
+    getVideoDetail(paramsData).then(({ data }) => {
+      data.draftList.forEach((element) => {
+        // 关键帧数据
+        element.keyFrameList = JSON.parse(JSON.stringify(keyFramesList));
+        element.checked = false;
+        element.storyboardList.forEach((item) => {
+          item.spinning = false;
+          // 设置原图地址
+          item.orignImagePath = item.orignImagePath
+            .split("quick")[1]
+            .replaceAll("\\", "/");
+          // 设置仿图图片地址 sd为单张图  mj多张 所以进行数组判断
+          if (item.currentImageList && item.currentImageList.length != 0) {
+            if (Array.isArray(item.currentImageList)) {
+              item.currentImageList.forEach((val, index) => {
+                item.currentImageList[index] = item.currentImageList[index]
                   .split("quick")[1]
                   .replaceAll("\\", "/");
               });
+            } else {
+              item.currentImageList = item.currentImageList
+                .split("quick")[1]
+                .replaceAll("\\", "/");
             }
-          });
+          }
+          // 设置历史记录图片地址
+          if (item.historyImageList && item.historyImageList.length != 0) {
+            item.historyImageList.forEach((val, index) => {
+              item.historyImageList[index] = item.historyImageList[index]
+                .split("quick")[1]
+                .replaceAll("\\", "/");
+            });
+          }
         });
-        console.log(data.draftList, "数据-----");
-        setDetial(data.draftList);
-      }
-    );
-  };
-  const getProgress = () => {
-    getVideoProgress().then((res) => {
-      console.log(res, "视频进度");
+      });
+      console.log(data.draftList, "数据-----");
+      setDetial(data.draftList);
     });
+  };
+  const getProgress = async (draftId) => {
+    return await getVideoProgress({ draftId });
   };
   // 生成音频接口
   const createAio = (draftId) => {
     generateAudio({
       draftId,
       ...voiceSetting,
+      modelType: paramsData.modelType,
     }).then((res) => {
       console.log(res, "生成音频接口数据");
     });
@@ -206,13 +237,18 @@ export default () => {
       },
     },
     {
-      title: "",
-      dataIndex: "age",
+      title: "配音",
+      dataIndex: "soundPath",
       width: 180,
       render: (val, record) => {
         return (
           <div>
-            <audio controls></audio>
+            <audio
+              controls
+              src={val}
+              style={{
+                width: "120px",
+              }}></audio>
           </div>
         );
       },
@@ -222,7 +258,20 @@ export default () => {
       dataIndex: "address",
       width: 180,
       render: (val, record) => {
-        return <div className={style.TableBoxFang}></div>;
+        return (
+          <div className={style.selectFrame}>
+            <Select
+              style={{ width: "90%" }}
+              placeholder='请选择'
+              onChange={() => changeAloneFrame(val, record)}>
+              {keyFramesList.map((item, index) => (
+                <Select.Option key={item.value} value={item.value}>
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+        );
       },
     },
   ];
@@ -246,9 +295,24 @@ export default () => {
           </div>
         </div>
         <div className={style.headTwo}>
+          <Progress
+            strokeColor={"#49AA19"}
+            trailColor={"rgba(255, 255, 255, 0.08)"}
+            percent={data.progress ?? 10}
+            style={{
+              width: "332px",
+            }}></Progress>
           <div>
-            <div className={style.statusCir}></div>
-            未识别到音频路径
+            <div
+              className={style.statusCir}
+              style={
+                data.storyboardList[0].soundPath
+                  ? {
+                      background: "#49AA19",
+                    }
+                  : null
+              }></div>
+            {data.storyboardList[0].soundPath ? "已识别到音频路径" : "未识别到音频路径"}
           </div>
         </div>
       </div>
@@ -261,6 +325,7 @@ export default () => {
     keyFramesList[index].checked = !keyFramesList[index].checked;
     if (keyFramesList[index].checked) {
       checkFrame.push(keyFramesList[index]);
+      console.log(checkFrame, " checkFrame数据");
     } else {
       checkFrame.splice(index, 1);
     }
@@ -283,12 +348,13 @@ export default () => {
     let idData = [];
     let index = 0;
     async function quee(res, rej) {
-      await func(data[index]);
+      let postData = await func(data[index]);
       ++index;
       console.log(data, "接口数据");
       if (index == data.length) {
         return res({
           status: "done",
+          postData,
         });
       } else {
         return quee();
@@ -303,32 +369,24 @@ export default () => {
   const createVio = (draftId) => {
     generateVideo({
       draftId,
-    })
-      .then(({ data }) => {
-        console.log(data, "合成视频接口");
-      })
-      .catch((err) => {});
+      modeltype: paramsData.modelType,
+    }).then(({ data }) => {
+      console.log(data, "合成视频接口");
+      if (data.id) {
+        // draftId
+        let progressData = getProgress(data.id);
+        console.log(progressData, "合成视频进度");
+      }
+    });
   };
-  // 下一步
+  // 点击合成视频
   const goNextStep = () => {
-    let checkEdList = detial.map((item) => item.checked);
+    let checkEdList = detial.filter((item) => item.checked);
     if (checkEdList.length == 0) {
       return message.error("至少选择一条草稿！");
     }
-    for (let index in checkEdList) {
-      for (let key in checkEdList[index].storyboardList) {
-        if (checkEdList[index].storyboardList[key]) {
-          break;
-        }
-      }
-    }
-    checkEdList.forEach((item, index) => {
-      item.storyboardList.forEach((val, key) => {
-        if (val) {
-        }
-      });
-    });
-    queeTask(checkEdList, createVio)(
+    let draftId = checkEdList.map((item) => item.draftId);
+    queeTask(draftId, createVio)(
       (res) => {
         console.log(res);
       },
@@ -346,11 +404,49 @@ export default () => {
   const closeFrame = () => {
     setShow(!show);
   };
-  const frameStart = () => {};
+  // 一键轮询关键帧
+  const oneKeyFrame = () => {
+    let checkEdList = detial.filter((item) => item.checked);
+    console.log(checkEdList);
+    let keyFrameList = checkFrame
+      .map((item) => item.value)
+      .map((item) => item.split(","));
+    if (checkEdList.length == 0) {
+      return message.error("至少选择一条草稿！");
+    } else {
+      let ids = checkEdList.map((item) => item.draftId);
+      let fn = async (draftId) => {
+        return await generateAllFrame({
+          draftId,
+          keyFrameList,
+        });
+      };
+      console.log(ids);
+      queeTask(
+        ids,
+        fn
+      )((res) => {
+        if (res.postData.code == 200) {
+          message.success("应用关键帧成功！");
+          setShow(false);
+          getDetial();
+        }
+      });
+    }
+  };
+  // 单独关键帧
+  const changeAloneFrame = (val, data) => {
+    console.log(123456);
+    pushAloneVideoFrame({
+      storyboardId: data.id,
+      keyframeStyle: undefined,
+    }).then((res) => {
+      console.log(res);
+    });
+  };
   useEffect(() => {
-    let { draftIds } = params.state;
-    // getVoiceHand();
-    getDetial(draftIds);
+    getVoiceHand();
+    getDetial();
   }, []);
   return (
     <ConfigProvider
@@ -393,6 +489,7 @@ export default () => {
                         <img src={Ques} alt='' />
                       </div>
                       <Select
+                        placeholder='请选择'
                         value={voiceSetting.soundModel}
                         style={{
                           width: "60%",
@@ -427,6 +524,7 @@ export default () => {
                             margin: "0 16px",
                           }}
                           step={0.01}
+                          placeholder='请选择'
                           value={voiceSetting.soundSpeed}
                           onChange={onChangeSoundSpeed}></InputNumber>
                       </div>
@@ -447,6 +545,7 @@ export default () => {
                         <InputNumber
                           min={0}
                           max={1}
+                          placeholder='请选择'
                           style={{
                             margin: "0 16px",
                           }}
@@ -463,9 +562,7 @@ export default () => {
                 <div className={style.options}>
                   <div className={style.optionsL}>
                     <div>视频草稿</div>
-                    <div className={style.circle}>
-                      {detial?.draftList?.length}
-                    </div>
+                    <div className={style.circle}>{detial?.length}</div>
                   </div>
                   <div className={style.optionsR}>
                     {/* <div>
@@ -482,8 +579,8 @@ export default () => {
                     <div className={style.modalContent}>
                       <div className={style.contentLeft}>
                         <div>
-                          <ReactSortable list={state} setList={setState}>
-                            {checkFrame &&
+                        <SortableList></SortableList>
+                              {/* {checkFrame &&
                               checkFrame.map((item, index) => (
                                 <div className={style.leftItem} key={index}>
                                   <div className={style.drag}>
@@ -491,18 +588,11 @@ export default () => {
                                   </div>
                                   <div className={style.icon}>
                                     <img src={getImageUrl("001")} alt='' />
-                                    {item.label}
+                                    {item.name}
                                   </div>
-                                  {/* <InputNumber
-                                    style={{
-                                      width: "56px",
-                                    }}
-                                    size='small'
-                                    value={item.value}
-                                    onChange={changeNumber}></InputNumber> */}
                                 </div>
-                              ))}
-                          </ReactSortable>
+                              ))} */}
+
                         </div>
                       </div>
                       <div className={style.contentRight}>
@@ -527,8 +617,8 @@ export default () => {
                       <div className={style.btn1} onClick={closeFrame}>
                         <div>关闭</div>
                       </div>
-                      <div className={style.btn2} onClick={frameStart}>
-                        <div>应用轮循</div>
+                      <div className={style.btn2}>
+                        <div onClick={oneKeyFrame}>应用轮循</div>
                       </div>
                     </div>
                   </div>

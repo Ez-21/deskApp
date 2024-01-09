@@ -1,12 +1,13 @@
 import style from "./index.module.less";
 import ImgUrl from "@/assets/twelve.jpeg";
 import Next from "@/assets/next.png";
-import { Checkbox, Progress } from "antd";
+import { Checkbox,Spin} from "antd";
 import BackBar from "@/components/backBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTaskDetial, setVideoFraming, getProgress } from "@/api/api.js";
 import { message } from "antd";
+// import {Progress} from 'element-react'
 import { appImagePath } from "@/func/index.js";
 export default function () {
   const [checkAllStatus, setCheckAllStatus] = useState(true);

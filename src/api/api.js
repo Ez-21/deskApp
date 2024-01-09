@@ -147,6 +147,14 @@ export const getMjDetial = (data)=>{
 }
 
 // 合成视频--------------------------------
+// 一键轮询关键帧
+export const generateAllFrame = (data) => {
+  return request({
+    url: "/api/generateAllFrame",
+    method: "post",
+    data,
+  });
+};
 // 获取视频草稿
 export const getVideoDetail = (data) => {
   return request({
@@ -158,7 +166,7 @@ export const getVideoDetail = (data) => {
 // 查询音色
 export const getVoice = ()=>{
   return request({
-    url:'/api/getSoundColor',
+    url:'/sd/getSoundColor',
     method:'get',
   })
 }
@@ -194,8 +202,14 @@ export const pushVideoFrame = (data)=>{
     data
   })
 } 
-
-
+// 插入单个关键帧
+export const pushAloneVideoFrame = (data)=>{
+  return request({
+    url:'/generateSingleFrame',
+    method:'post',
+    data
+  })
+} 
 // MIne 
 // 微信支付(获取二维码)
 export const getWxPayCode = (data)=>{

@@ -16,13 +16,16 @@
     transform: translate3d(-50%, -50%, 0);
     width: 85%;
     height: 650px;
-    background: #12121D;
+    // background: #12121D;
+    background: #131313;
     padding: 22px;
     overflow-y: scroll;
-    .boxTop{
+
+    .boxTop {
         display: grid;
         grid-template-columns: repeat(3, calc(100%/3));
     }
+
     .left {
         display: flex;
         flex-direction: column;
@@ -31,12 +34,13 @@
         .item {
             box-sizing: border-box;
             padding: 16px;
-            background: rgba(107, 112, 137, .051);
+            // background: rgba(107, 112, 137, .051);
             border-radius: 16px;
             display: flex;
             flex-direction: column;
             margin-bottom: 15px;
             padding: 16px;
+            background: #272727 !important;
 
             .itemTitle {
                 margin-bottom: 8px;
@@ -54,12 +58,14 @@
                 flex: none;
                 font-size: 14px;
                 height: 270px;
+                background: #272727 !important;
 
                 textarea {
                     width: 100%;
                     padding: 8px;
                     box-sizing: border-box;
                     background: #2c2f41;
+                    // background: #272727 !important;
                     border: none;
                     border-radius: 16px;
                     color: #fff;
@@ -75,6 +81,7 @@
     .center {
         .one {
             .Item();
+            background: #272727 !important;
 
             .boxLeft {
                 background: @textLeft1;
@@ -89,6 +96,7 @@
 
         .two {
             .Item();
+            background: #272727 !important;
 
             .boxLeft {
                 background: @textLeft2;
@@ -103,6 +111,7 @@
 
         .three {
             .Item();
+            background: #272727 !important;
 
             .boxLeft {
                 background: @textLeft3;
@@ -182,6 +191,7 @@
             width: 100%;
             .rightItem();
             .tab2();
+
             .ant-collapse-content-box {
                 display: flex !important;
                 flex-wrap: wrap !important;
@@ -256,7 +266,8 @@
         }
     }
 }
-.btnBox{
+
+.btnBox {
     display: flex;
     justify-content: flex-end;
     align-items: center;

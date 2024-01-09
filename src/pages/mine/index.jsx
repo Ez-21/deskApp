@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { getImageUrl } from "../../func";
 import { getWxPayCode } from "@/api/api";
 import { Modal } from "antd";
+import Sort from '../../components/callWordEd/2'
 const App = () => {
   const goPage = useNavigate();
   const [payModalShow, SetPayModalShow] = useState(false);
@@ -60,6 +61,7 @@ const App = () => {
   };
   return (
     <div className={style.box}>
+      {/* <Sort></Sort> */}
       {/*支付订单弹窗*/}
       {payModalShow && (
         <div className={style.payModal}>
@@ -147,9 +149,10 @@ const App = () => {
               <div>userId：{userInfo?.userid}</div>
             </div>
           </div>
-          <div className={style.get} onClick={openGet}>
+          {/* 暂时隐藏 */}
+          {/* <div className={style.get} onClick={openGet}>
             立即激活
-          </div>
+          </div> */}
           {userInfo ? (
             <div className={style.quit} onClick={quit}>
               <img src={Quit} alt='' />

@@ -22,9 +22,9 @@ let theme = {
       colorText: "#B0B0B0",
     },
     InputNumber: {
-      colorText: "#BDBDBD",
-      colorBgContainer: "#232323",
-      colorBorder: "#4F4F4F",
+      colorText:'#BDBDBD',
+      colorBgContainer:'#232323',
+      colorBorder:'#4F4F4F'
     },
     Slider: {
       railBg: "#343434",
