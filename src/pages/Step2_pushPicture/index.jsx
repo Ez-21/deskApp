@@ -344,7 +344,7 @@ export default () => {
       width: 180,
       fixed: "left",
       render: (val) => {
-        return <img src={val} alt='' className={style.tableImg} />;
+        return <img src={val} alt="" className={style.tableImg} />;
       },
     },
     {
@@ -376,13 +376,14 @@ export default () => {
       width: 180,
       render: (val, record) => {
         return (
-          <a title='点击打开反推词编辑器'>
+          <a title="点击打开反推词编辑器">
             <div
               className={style.TableBox}
               style={{
                 overflowY: "scroll",
               }}
-              onClick={() => push(record)}>
+              onClick={() => push(record)}
+            >
               {val ?? ""}
             </div>
           </a>
@@ -415,7 +416,8 @@ export default () => {
                                   }
                                 : undefined
                             }
-                            key={index}>
+                            key={index}
+                          >
                             {item}
                           </div>
                         );
@@ -427,13 +429,14 @@ export default () => {
                 <div className={style.black}></div>
                 <img
                   src={record.currentImageList[mjSetting.currentIndex]}
-                  alt=''
+                  alt=""
                 />
                 <div
                   className={style.wipe}
                   onClick={() => setWipeStatus(!wipeStatus)}
-                  style={showComp != 2 ? { top: 0 } : {}}>
-                  <img src={Wipe} alt='' />
+                  style={showComp != 2 ? { top: 0 } : {}}
+                >
+                  <img src={Wipe} alt="" />
                   擦除
                 </div>
                 {wipeStatus && (
@@ -465,7 +468,8 @@ export default () => {
                 <div
                   className={style.histItem}
                   key={index}
-                  onClick={(e) => ckHistoryImg(item, record, key, e)}>
+                  onClick={(e) => ckHistoryImg(item, record, key, e)}
+                >
                   <Image.PreviewGroup>
                     <Image
                       width={160}
@@ -493,9 +497,10 @@ export default () => {
             <div>
               <Checkbox
                 checked={data.checked}
-                onChange={(e) => changeCheckBox(e)}></Checkbox>
+                onChange={(e) => changeCheckBox(e)}
+              ></Checkbox>
             </div>
-            <img src={true ? creatRight : createDown} alt='' />
+            <img src={true ? creatRight : createDown} alt="" />
             <div>{data.draftName}</div>
           </div>
         </div>
@@ -506,9 +511,10 @@ export default () => {
             percent={data.progress ?? 10}
             style={{
               width: "332px",
-            }}></Progress>
+            }}
+          ></Progress>
           <div onClick={(e) => picSets(e, data)}>
-            <img src={createSet} alt='' />
+            <img src={createSet} alt="" />
             出图配置
           </div>
         </div>
@@ -702,13 +708,14 @@ export default () => {
     <ConfigProvider
       theme={{
         ...theme,
-      }}>
+      }}
+    >
       {/* 任务进度遮罩层 */}
       {state.value && (
         <div className={style.mask}>
           <div className={style.maskContent}>
             <div className={style.progress}>
-              <Progress size={90} type='circle' percent={state.progress} />
+              <Progress size={90} type="circle" percent={state.progress} />
             </div>
             <div className={style.createIng}>
               {state.progress == 100 ? "任务执行完毕" : "任务执行中"}
@@ -729,9 +736,9 @@ export default () => {
         <div className={style.titleBox}>
           <div className={style.step}>
             <div>视频抽帧</div>
-            <img src={Next} alt='' />
+            <img src={Next} alt="" />
             <div className={style.stepKey}>反应生图</div>
-            <img src={Next} alt='' />
+            <img src={Next} alt="" />
             <div>合成视频</div>
           </div>
           <div className={style.stepHandle}>
@@ -748,7 +755,8 @@ export default () => {
           <CallWord
             close={() => setCallWorded(false)}
             record={targetData}
-            getDetial={getDetial}></CallWord>
+            getDetial={getDetial}
+          ></CallWord>
         )}
         <div className={style.tabBox}>
           <div className={style.tabContent}>
@@ -760,12 +768,14 @@ export default () => {
               centered
               items={tabsItem}
               onChange={editTabs}
-              defaultkey={"1"}></Tabs>
+              defaultkey={"1"}
+            ></Tabs>
             <div className={style.bottomContent}>
               {showComp !== 3 && (
                 <div
                   className={style.left}
-                  style={showComp == 3 ? { display: "none" } : {}}>
+                  style={showComp == 3 ? { display: "none" } : {}}
+                >
                   {showComp == 1 && (
                     <TabOne
                       ref={tableOneRef}
@@ -804,7 +814,8 @@ export default () => {
                   className={style.Collapse}
                   style={{
                     marginTop: "28px",
-                  }}>
+                  }}
+                >
                   {picModal && (
                     <div className={style.picModal}>
                       <div className={style.title}>出图配置</div>
@@ -812,14 +823,15 @@ export default () => {
                       <div className={style.content}>
                         <div className={style.contentTop}>
                           <div>风格LORA</div>
-                          <img src={getImageUrl("pirAdd")} alt='' />
+                          <img src={getImageUrl("pirAdd")} alt="" />
                         </div>
                         <div className={style.contentBottom}>
                           <Select
-                            placeholder='请选择Lora模型'
+                            placeholder="请选择Lora模型"
                             onChange={changeLora}
                             style={{ width: "100%" }}
-                            value={dataModel.loraId}>
+                            value={dataModel.loraId}
+                          >
                             {dataModel.loraArr &&
                               dataModel.loraArr.map((item, index) => (
                                 <Option value={item.value} key={index}>
@@ -840,7 +852,8 @@ export default () => {
                               min={20}
                               max={40}
                               onChange={changeSteps}
-                              value={dataModel.loraIterationSteps}></Slider>
+                              value={dataModel.loraIterationSteps}
+                            ></Slider>
                             <InputNumber
                               value={dataModel.loraIterationSteps}
                               min={20}
@@ -849,7 +862,8 @@ export default () => {
                               style={{
                                 margin: "0 16px",
                               }}
-                              step={0.1}></InputNumber>
+                              step={0.1}
+                            ></InputNumber>
                           </div>
                         </div>
                       </div>
@@ -861,7 +875,8 @@ export default () => {
                             items={[
                               { label: "反向提示词", key: 1 },
                               { label: "敏感词", key: 2 },
-                            ]}></Tabs>
+                            ]}
+                          ></Tabs>
 
                           <div className={style.wordBox}>
                             {wordTabs == 1
@@ -872,7 +887,7 @@ export default () => {
                                       {item}
                                       <img
                                         src={getImageUrl("closeWindow")}
-                                        alt=''
+                                        alt=""
                                         onClick={() => delWord(true, index)}
                                       />
                                     </div>
@@ -884,15 +899,15 @@ export default () => {
                                     {item}
                                     <img
                                       src={getImageUrl("closeWindow")}
-                                      alt=''
+                                      alt=""
                                     />
                                   </div>
                                 ))}
                           </div>
                           <div className={style.inpVal}>
                             <input
-                              type='text'
-                              placeholder='请输入'
+                              type="text"
+                              placeholder="请输入"
                               value={dataModel.textVal}
                               onChange={(e) => inputWord(e.target.value)}
                             />
@@ -913,19 +928,20 @@ export default () => {
                       style={{
                         color: "white",
                       }}
-                      onChange={changeCollapse}>
+                      onChange={changeCollapse}
+                    >
                       {detial.draftList &&
                         detial?.draftList.map((item, index) => (
                           <Panel
                             key={item.draftId}
-                            header={
-                              <Header data={item} index={index}></Header>
-                            }>
+                            header={<Header data={item} index={index}></Header>}
+                          >
                             <Table
-                              rowKey='id'
+                              rowKey="id"
                               scroll={{ x: 800 }}
                               dataSource={item.storyboardList}
-                              columns={columns}></Table>
+                              columns={columns}
+                            ></Table>
                           </Panel>
                         ))}
                     </Collapse>
