@@ -33,8 +33,8 @@ const Index = () => {
               console.log(res.data.state);
               // 取消扫码
               if (res.data.state == 403) {
-                 clearInterval(stateQuery);
-                 return requestWx()
+                clearInterval(stateQuery);
+                return requestWx();
               }
               if (res.code == -1) {
                 return clearInterval(stateQuery);
@@ -47,7 +47,7 @@ const Index = () => {
                   JSON.stringify(res.data.userinfo)
                 );
                 clearInterval(stateQuery);
-                return GoPage("/index/home");
+                return GoPage("/index/home", { replace: true });
               }
               // 二维码失效
               if (res.data.state == 666) {
@@ -67,6 +67,7 @@ const Index = () => {
   const login = () => {
     GoPage("/index/home", {
       state: {},
+      replace: true,
     });
   };
   const refreshQrcode = () => {
@@ -83,10 +84,11 @@ const Index = () => {
         style={{
           background: `url(${backGround}) no-repeat`,
           backgroundPosition: "center",
-        }}>
+        }}
+      >
         <div className={style.titleBox}>
-          <img src={logo} alt='' />
-          <img src={indexLogo} alt='' />
+          <img src={logo} alt="" />
+          <img src={indexLogo} alt="" />
           {/*<div className={style.title}>*/}
           {/*    绘唐创作平台*/}
           {/*</div>*/}
