@@ -18,7 +18,7 @@ import {
   InputNumber,
   message,
   Spin,
-  notification,
+  Image,
 } from "antd";
 // 返回组件
 import BackBar from "@/components/backBar";
@@ -43,8 +43,9 @@ import {
   createPicHandle,
   setSdModel,
   reverseWord,
-  getGlobalStyle,
-  getMjDetial,
+  // getGlobalStyle,
+  // getMjDetial,
+  reverseAloneWord,
 } from "@/api/api.js";
 export default () => {
   const go = useNavigate();
@@ -112,7 +113,6 @@ export default () => {
   });
   // 组件实例
   const tableOneRef = useRef(null);
-
   const tableTwoRef = useRef(null);
 
   // 获取SD详情
@@ -211,63 +211,67 @@ export default () => {
     let draft_board_uuid = checkVal
       .map((item) => item.storyboardList.map((item) => item.id))
       .flat(2);
+    console.log(draft_board_uuid, "分镜id");
     // 获取左侧组件数据
     createPic.model_value = tableOneRef.current.form.modelId;
     createPic.model_type = showComp;
     // 开启队列遮罩
     state.value = true;
     state.total = draft_board_uuid.length;
+    // 初始化进度
     state.progress = ((1 / draft_board_uuid.length) * 100).toFixed(2);
     setState({ ...state });
     // 开始执行任务队列
-    queeTask(draft_board_uuid, useCreatePicturePost)()
-      .then((res) => {
-        let sessionData = JSON.parse(sessionStorage.getItem("stateData"));
-        console.log(sessionData, "缓存数据");
-        let { progress, targetId } = sessionData;
+    queeTask(draft_board_uuid, useCreatePicturePost)(
+      (res) => {
+        console.log(res, "数据流向");
         if (res.status == "done") {
           state.value = false;
+          state.progress = 100;
           setState({ ...state });
+          message.success("生图任务执行完毕");
         } else if (res.status == "ing") {
           setState((data) => {
             data.value = res.status == "ing" ? true : false;
-            data.progress = progress;
+            data.progress = res.progress;
             data.target = detial.draftList.find((item) => {
-              return item.storyboardList.map((val) => val.id == targetId);
+              return item.storyboardList.map((val) => val.id == res.targetId);
             }).draftName;
             return { ...data };
           });
         }
-      })
-      .catch((err) => {
-        if (err.status == "break") {
+      },
+      (rej) => {
+        if (rej.status == "break") {
           state.value = false;
           setState({ ...state });
-          message.info("任务已中断");
+          return message.info("任务已中断");
         }
-      });
+      }
+    );
     setCreatePic({ ...createPic });
   };
   // 重新生图
   const regenPicture = async (record) => {
     record.spinning = true;
     setDetial({ ...detial });
-    await useCreatePicturePost(record.id, null);
+    await useCreatePicturePost(record.id);
     getDetial();
   };
   // 重新反推
   const regenText = async (record) => {
-    // reverseWord(record)
+    reverseAloneWord({ paragraphId: record.id }).then((res) => {
+      console.log(res);
+      record.reverseInference = res.data.reverseInferenceWord;
+      setDetial({ ...detial });
+    });
   };
   // 调用一键生图接口
-  const useCreatePicturePost = async (value, controller) => {
-    await createPicHandle(
-      {
-        modelType: showComp,
-        storyboardId: value,
-      },
-      controller && controller?.signal
-    );
+  const useCreatePicturePost = async (value) => {
+    await createPicHandle({
+      modelType: showComp,
+      storyboardId: value,
+    });
   };
   // 点击一键反推提示词
   const reverseWordHandle = async () => {
@@ -322,11 +326,11 @@ export default () => {
   // table表头
   const columns = [
     {
+      key: "index",
       title: "编号",
       dataIndex: "index",
-      align: "center",
+      // align: "center",
       fixed: "left",
-      width: 70,
       render: (text, record, index) => (
         <div className={style.codeNumer}>
           <div>{index + 1}</div>
@@ -334,9 +338,10 @@ export default () => {
       ),
     },
     {
+      key: "orignImagePath",
       title: "原图",
       dataIndex: "orignImagePath",
-      align: "center",
+      // align: "center",
       width: 180,
       fixed: "left",
       render: (val) => {
@@ -344,28 +349,31 @@ export default () => {
       },
     },
     {
+      key: "orignText",
       title: "原文",
       dataIndex: "orignText",
-      align: "center",
+      // align: "center",
       width: 180,
       fixed: "left",
       render: (val) => {
-        return <div className={style.TableBox}>{val || "暂无"}</div>;
+        return <div className={style.TableBox}>{val || ""}</div>;
       },
     },
     {
+      key: "rewriteText",
       title: "重写",
       dataIndex: "rewriteText",
-      align: "center",
+      // align: "center",
       width: 180,
       render: (val) => {
-        return <div className={style.TableBox}>{val || "暂无"}</div>;
+        return <div className={style.TableBox}>{val || ""}</div>;
       },
     },
     {
+      key: "reverseInference",
       title: "反推词",
       dataIndex: "reverseInference",
-      align: "center",
+      // align: "center",
       width: 180,
       render: (val, record) => {
         return (
@@ -376,22 +384,23 @@ export default () => {
                 overflowY: "scroll",
               }}
               onClick={() => push(record)}>
-              {val ?? "暂无"}
+              {val ?? ""}
             </div>
           </a>
         );
       },
     },
     {
+      key: "currentImageList",
       title: "仿图",
       dataIndex: "currentImageList",
-      align: "center",
+      // align: "center",
       width: 180,
       render: (val, record) => {
         if (val.length != 0) {
           return (
             <div className={style.TableBoxFang}>
-            <Spin spinning={record.spinning} style={{height:'160px'}}>
+              <Spin spinning={record.spinning}>
                 <div className={style.indexBox}>
                   {showComp == 2 && (
                     <div className={style.topBox}>
@@ -433,9 +442,9 @@ export default () => {
                 )}
                 <div className={style.handleBottom}>
                   <div onClick={() => regenPicture(record)}>重新生成</div>
-                  <div>重新反推</div>
+                  <div onClick={() => regenText(record)}>重新反推</div>
                 </div>
-            </Spin>
+              </Spin>
             </div>
           );
         } else {
@@ -444,9 +453,10 @@ export default () => {
       },
     },
     {
-      title: "历史记录",
+      key: "historyImageList",
+      // title: "历史记录",
       dataIndex: "historyImageList",
-      align: "center",
+      // align: "center",
       width: 180,
       render: (data, record, key) => {
         return (
@@ -456,8 +466,14 @@ export default () => {
                 <div
                   className={style.histItem}
                   key={index}
-                  onClick={() => ckHistoryImg(item, record, key)}>
-                  <img src={item ?? ""} alt='' />
+                  onClick={(e) => ckHistoryImg(item, record, key, e)}>
+                  <Image.PreviewGroup>
+                    <Image
+                      width={160}
+                      src={item}
+                      preview={{ maskClassName: style.imgMask }}
+                    />
+                  </Image.PreviewGroup>
                 </div>
               ))}
           </div>
@@ -502,7 +518,8 @@ export default () => {
   };
   const onChange = (key) => {};
   // 点击历史记录中的图片
-  const ckHistoryImg = (value, record, key) => {
+  const ckHistoryImg = (value, record, key, e) => {
+    e.stopPropagation();
     console.log(key, "索引");
     console.log(value, "值");
     console.log(record, "数据");
@@ -522,7 +539,19 @@ export default () => {
   };
   // 下一步
   const goNextStep = () => {
-    go("/Step3SyncVideo", { state: {} });
+    // 抽取草稿任务ids
+    let draftIds = detial.draftList
+      .filter((item) => item.checked)
+      .map((item) => item.draftId);
+    if (draftIds.length == 0) {
+      return message.error("至少选择一条草稿任务！");
+    }
+    go("/Step3SyncVideo", {
+      state: {
+        draftIds,
+        modelType: showComp,
+      },
+    });
   };
   // 上一步
   const goBeforeStep = () => {
@@ -645,6 +674,7 @@ export default () => {
     state.value = false;
     setState({ ...state });
     message.info("任务已中断!");
+    getDetial();
   };
   // 头部tabs
   const [tabsItem, setTabsItem] = useState([
@@ -652,10 +682,10 @@ export default () => {
       label: "Stable Diffusion",
       key: "1",
     },
-    {
-      label: "Midjourney",
-      key: "2",
-    },
+    // {
+    //   label: "Midjourney",
+    //   key: "2",
+    // },
     // {
     //   label: "Dalle3",
     //   key: "3",
@@ -681,7 +711,9 @@ export default () => {
             <div className={style.progress}>
               <Progress size={90} type='circle' percent={state.progress} />
             </div>
-            <div className={style.createIng}>任务执行中</div>
+            <div className={style.createIng}>
+              {state.progress == 100 ? "任务执行完毕" : "任务执行中"}
+            </div>
             <div className={style.progressText}>
               共有{state.total}个任务正在执行，当前执行的任务是
               <u>{state.target}</u>，任务进度是{state.progress}%
@@ -891,7 +923,8 @@ export default () => {
                               <Header data={item} index={index}></Header>
                             }>
                             <Table
-                              scroll={{ x: 1000 }}
+                              rowKey='id'
+                              scroll={{ x: 800 }}
                               dataSource={item.storyboardList}
                               columns={columns}></Table>
                           </Panel>

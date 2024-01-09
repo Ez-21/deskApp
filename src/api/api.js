@@ -98,10 +98,9 @@ export const getSdDetial = (data) => {
   });
 };
 // 一键生图
-export const createPicHandle = (data,singal) => {
+export const createPicHandle = (data) => {
   return request({
     url: "/sd/generateImage",
-    singal,
     method: "post",
     data,
   });
@@ -115,11 +114,11 @@ export const reverseWord = (data)=>{
   })
 }
 // 单条数据反推提示词
-export const reverseAloneWord = (params)=>{
+export const reverseAloneWord = (data)=>{
   return request({
-    url:'/api/reverseInferenceOneWord',
-    method:'get',
-    params
+    url:'/sd/reverseInferenceOneWord',
+    method:'post',
+    data
   })
 }
 // 保存提示词
@@ -148,6 +147,21 @@ export const getMjDetial = (data)=>{
 }
 
 // 合成视频--------------------------------
+// 获取视频草稿
+export const getVideoDetail = (data) => {
+  return request({
+    url: "/api/getVideoDetails",
+    method: "post",
+    data,
+  });
+};
+// 查询音色
+export const getVoice = ()=>{
+  return request({
+    url:'/api/getSoundColor',
+    method:'get',
+  })
+}
 // 查询视频合成进度
 export const getVideoProgress = (data) => {
   return request({
@@ -157,17 +171,37 @@ export const getVideoProgress = (data) => {
   });
 };
 //合成视频
-export const generateVideo = (params) => {
+export const generateVideo = (data) => {
   return request({
-    url: "/api/generateVideo",
-    method: "get",
-    params,
+    url: "/api/videoSynthesizer",
+    method: "post",
+    data,
+  });
+};
+// 生成音频
+export const generateAudio = (data) => {
+  return request({
+    url: "/sd/generateSound",
+    method: "post",
+    data,
   });
 };
 // 插入关键帧
 export const pushVideoFrame = (data)=>{
   return request({
     url:'/api/generateFrame',
+    method:'post',
+    data
+  })
+} 
+
+
+// MIne 
+// 微信支付(获取二维码)
+export const getWxPayCode = (data)=>{
+  return request({
+    url:'https://www.huitangaigc.cn/open/payment/wechat/pay',
+    baseURL:'',
     method:'post',
     data
   })

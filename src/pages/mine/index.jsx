@@ -10,14 +10,25 @@ import PushMoney from "@/assets/pushMoney.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getImageUrl } from "../../func";
+import { getWxPayCode } from "@/api/api";
 import { Modal } from "antd";
 const App = () => {
   const goPage = useNavigate();
   const [payModalShow, SetPayModalShow] = useState(false);
   const [getModalShow, SetGetModalShow] = useState(false);
+  const [payWay,setPayWay] = useState({
+    wx:'',
+    zfb:''
+  })
   const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-  const openPay = () => {
+  const payNum = [10.0, 20.0, 50.0, 100.0, 300.0, 500.0];
+  const openPay = (data) => {
     SetPayModalShow(true);
+    getWxPayCode({
+      charge_amount:data
+    }).then(res=>{
+      console.log(res);
+    })
   };
   const closePay = () => {
     SetPayModalShow(false);
@@ -86,7 +97,7 @@ const App = () => {
                 </div>
                 <div>
                   <div>
-                    <img src={getImageUrl("wx")} alt='' />
+                    <img src={payWay.wx} alt='' />
                   </div>
                   <div className={style.payBtn2}>生成微信二维码</div>
                 </div>
@@ -162,61 +173,14 @@ const App = () => {
             充值
           </div>
           <div className={style.moneyItem}>
-            <div className={style.itemBox} onClick={openPay}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
+            {payNum.map((item) => (
+              <div className={style.itemBox} onClick={()=>openPay(item)} key={item}>
+                <div className={style.itemNumber}>200积分</div>
+                <div>
+                  ￥ <span>{item}</span>
+                </div>
               </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
-
-            <div className={style.itemBox}>
-              <div className={style.itemNumber}>200积分</div>
-              <div>
-                ￥ <span>200</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

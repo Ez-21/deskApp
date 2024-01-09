@@ -98,10 +98,9 @@ function appImagePath(type) {
 @des 一键生图任务队列
 @params  data:Array 数据  
          fn:Promise 接口请求方法  
-         breakTashL:{status:boolean} 打断任务标识
+         breakStatus:打断任务标识
 * */
 function queeTask(data, fn) {
-  const controller = new AbortController();
   sessionStorage.setItem("breakStatus", "0");
   sessionStorage.setItem("stateData", JSON.stringify({}));
   // 当前任务
@@ -113,17 +112,21 @@ function queeTask(data, fn) {
   // 进度值
   let progress = undefined;
 
-  function gen() {
+  return async function gen(res,rej) {
     // 判断中止状态
     let breakStatus = sessionStorage.getItem("breakStatus");
     if (Boolean(+breakStatus)) {
-      controller.abort();
-      return Promise.reject({
+      return rej({
         status: "break",
       });
     }
-    if (targetNum < data.length) {
-      return new Promise(async (res, rej) => {
+    // 任务执行完毕
+    if(targetNum==totalNum){
+      return  res({
+        status: "done",
+      })
+    }
+    if (targetNum < totalNum) {
         // 设置当前执行的任务id
         sessionStorage.setItem(
           "stateData",
@@ -131,34 +134,30 @@ function queeTask(data, fn) {
             targetId: value,
           })
         );
-        await fn(value, controller);
+        await fn(value);
         ++targetNum;
+
         value = data[targetNum - 1];
         // 进度
         progress = ((targetNum / totalNum) * 100).toFixed(2);
         console.log(progress,'任务进度')
         // 设置进度
-        let targetId = JSON.parse(sessionStorage.getItem("stateData")).targetId;
-        sessionStorage.setItem(
-          "stateData",
-          JSON.stringify({
-            targetId,
-            progress,
-          })
-        );
-        res({
-          status: "ing",
-        });
-        return gen();
-      });
+        // let targetId = JSON.parse(sessionStorage.getItem("stateData")).targetId;
+       gen(res,rej);
+       res({
+        status: "ing",
+        targetId:value,
+        progress,
+      }) 
     } else {
-      return Promise.resolve({
+      return rej({
         status: "done",
       });
     }
   }
-  return gen;
+   ;
 }
+
 export {
   setWindowSize,
   minWindow,

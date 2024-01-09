@@ -10,6 +10,8 @@ const App = (props) => {
   const [panel, setPanel] = useState([]);
   //输出
   const [outPut, setOutPut] = useState([]);
+  const [inPut, setInPut] = useState([]);
+  const [inputText, setInputText] = useState("");
   const [option, setOption] = useState({
     normal: [],
     style: [],
@@ -37,11 +39,14 @@ const App = (props) => {
       key: "5",
     },
   ];
-  const getJson = () => {
-    fetch("/public/json/promot.json")
+  const setConcat = ()=>{
+     let newVal = inPut.concat(outPut)  
+     setOutPut(newVal)
+  }
+  const getJson = async () => {
+    return await fetch("/public/json/promot.json")
       .then((res) => res.json())
       .then((res) => {
-        console.log(res, "json文件");
         setContent((val) => {
           let content = Object.values(res);
           content.forEach((item) => (item.checked = true));
@@ -52,7 +57,7 @@ const App = (props) => {
             props.record.reverseInference &&
             props.record.reverseInference.length != 0
           ) {
-            props.record.reverseInference.split(",").map((data) => {
+            props.record.reverseInference.split(",").forEach((data) => {
               content.forEach((val) => {
                 if (data == val.text) {
                   option[val.subType].push(val);
@@ -61,14 +66,35 @@ const App = (props) => {
                     setOutPut(outVal);
                     return { ...option };
                   });
+                } else {
+                  //json文件不存在的数据就push到input中检测产生的重复数据
+                  let value = JSON.stringify({
+                    text: data,
+                    checked: true,
+                    lang: data,
+                  });
+                  if (!inPut.includes(value)) {
+                    inPut.push(value);
+                  }
+                  // 有奇怪报错  加个判断
+                  let newInput = inPut.map((item) => {
+                    if (typeof item == "string") {
+                      return JSON.parse(item);
+                    } else {
+                      return item;
+                    }
+                  });
+                  setInPut(newInput);
+                  setOutPut((res) => {
+                    return [...newInput, ...outPut];
+                  });
                 }
               });
             });
           }
           return content;
         });
-      })
-      .finally(() => {});
+      });
   };
   //点击itme
   const ckItem = (val, index) => {
@@ -82,12 +108,22 @@ const App = (props) => {
     if (val.subType == "quality") {
       option.quality.push(val);
     }
-    let outText = Object.values(option).flat(2);
-    // for (const item of outText) {
-    //   item.checked = true;
+    let arr1 = Object.values(option).flat(2);
+    let arr2 = arr1.concat(inPut);
+    // 判断是否详情进来outPut已经有数据
+    // if (outPut.length > 0) {
+    //   setOutPut(arr2);
+    // } else {
+      setOutPut(arr1);
     // }
-    setOutPut(outText);
     setOption({ ...option });
+  };
+  // Input 输入配置词汇
+  const changeInput = (e) => {
+    // console.log(e.nativeEvent.data);
+  };
+  const blurInput = () => {
+
   };
   // 开启或者禁用
   const enOrdis = (props, type) => {
@@ -104,16 +140,6 @@ const App = (props) => {
       }
     }
     setOutPut([...outPut]);
-    // outPut.forEach((item, index) => {
-    //   if (!option[type][props.index].checked) {
-    //     if (JSON.stringify(item) == JSON.stringify(props.item)) {
-    //       outPut.splice(index, 1);
-    //       return setOutPut([...outPut]);
-    //     }
-    //   } else {
-    //     return setOutPut([...outPut]);
-    //   }
-    // });
     setOption({ ...option });
   };
   //切换tabs
@@ -200,14 +226,13 @@ const App = (props) => {
   // 点击保存
   const save = () => {
     // 展平3种类型的数组并筛选出未禁用的数据块进行字符串化
-    let prompt = Object.values(option)
+    let arr1 = Object.values(option)
       .flat(2)
       .filter((item) => item.checked == true)
-      .map((item) => item.text)
-      .toString();
+      .map((item) => item.text);
     let data = {
       storyboardId: props.record.id,
-      prompt,
+      prompt: arr1.toString(),
     };
     savePrompt(data).then((res) => {
       console.log(res, "保存提示词");
@@ -218,23 +243,39 @@ const App = (props) => {
   };
   useEffect(() => {
     // 返显提示词数据
-    console.log(props.record.reverseInference);
+    console.log(props.record.reverseInference, "返显提示词");
     getJson();
+    setConcat()
   }, []);
   return (
     <ConfigProvider theme={{ ...theme }}>
       <div className={style.box}>
         <div className={style.boxTop}>
           <div className={style.left}>
-             <div className={style.item}>
+            <div className={style.item}>
               <div className={style.itemTitle}>Input</div>
               <div className={style.itemContent}>
-                <textarea cols='30' rows='10'></textarea>
+                <textarea
+                  cols='30'
+                  rows='10'
+                  disabled
+                  value={
+                    inPut
+                      .map((item) => {
+                        if (item.checked) {
+                          return item.text;
+                        }
+                      })
+                      .filter(Boolean)
+                      .toString() ?? ""
+                  }></textarea>
               </div>
-            </div> 
+            </div>
             <div className={style.item}>
               <div className={style.itemTitle}>Ouput</div>
-              <div className={style.itemContent}>
+              <div className={style.itemContent} style={{
+                marginTop:'30px'
+              }}>
                 <textarea
                   cols='30'
                   rows='10'
@@ -249,6 +290,7 @@ const App = (props) => {
                       .filter(Boolean)
                       .toString() ?? ""
                   }
+                  readOnly
                   disabled></textarea>
               </div>
             </div>

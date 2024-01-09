@@ -87,7 +87,6 @@
           align-items: center;
           color: rgba(255, 255, 255, 0.85);
           font-size: 14px;
-
           img {
             margin-right: 8px;
           }
@@ -156,7 +155,8 @@
         background: #131313;
         overflow-y: scroll;
         overflow-x: scroll;
-
+        box-sizing: border-box;
+        max-height: 100vh;
         .options {
           width: 100%;
           height: 32px;
@@ -381,7 +381,7 @@
   position: absolute;
   box-sizing: border-box;
   padding: 8px;
-  width: 350px;
+  width: 327px;
   // height: 300px;
   background: #1F1F1F;
 
@@ -400,9 +400,8 @@
     .contentLeft {
       box-sizing: border-box;
       padding: 8px;
-      width: 75%;
+      width: 176px;
       border-right: 1px solid #343434;
-
       .leftItem {
         margin-bottom: 10px;
         display: flex;
@@ -412,22 +411,25 @@
         font-size: 14px;
         white-space: nowrap;
         justify-content: space-between;
-
         >div {
           display: flex;
           align-items: center;
         }
-
         .drag {
           box-sizing: border-box;
           width: 20px;
           height: 28px;
           background-color: #313131;
           cursor: pointer;
-
           img {
             width: 19px;
             height: 100%;
+          }
+        }
+        .icon{
+          margin: 0 4px;
+          >img{
+            margin: 0 8px;
           }
         }
       }
@@ -436,8 +438,7 @@
     .contentRight {
       box-sizing: border-box;
       padding: 8px;
-      width: 45%;
-
+      width: 137px;
       .rightItem {
         margin-bottom: 8px;
         display: flex;
@@ -474,8 +475,28 @@
     }
   }
 
+  .btnBox {
+    margin-top: 9px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+
+    .btn1 {
+      .btn();
+
+      >div {
+        background: #232323 !important;
+      }
+    }
+
+    .btn2 {
+      .btn()
+    }
+  }
+
+
+
   .btn {
-    margin: 9px 9px 0 9px;
     display: flex;
     align-items: center;
     justify-content: flex-end;

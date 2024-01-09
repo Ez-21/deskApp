@@ -12,6 +12,10 @@ var theme = {
       handleActiveColor: "#1755FF",
       trackBg: "#1755FF",
     },
+    Spin: {
+      /* 这里是你的组件 token */
+      contentHeight:'160px'
+    },
     Select: {
       selectorBg: "#1E1E1E",
       colorTextPlaceholder: "#B0B0B0",
