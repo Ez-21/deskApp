@@ -1,56 +1,64 @@
 import style from "./index.module.less";
-import ImgUrl from "@/assets/twelve.jpeg";
-import Next from "@/assets/next.png";
-import { Checkbox,Spin} from "antd";
+import ImgUrl from "/public/assets/twelve.jpeg";
+import Next from "/public/assets/next.png";
+import { Checkbox, Spin } from "antd";
 import BackBar from "@/components/backBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTaskDetial, setVideoFraming, getProgress } from "@/api/api.js";
 import { message } from "antd";
-// import {Progress} from 'element-react'
-import { appImagePath } from "@/func/index.js";
+import { Progress } from "tdesign-react";
+import { convertFileSrc } from "@tauri-apps/api/tauri";
 export default function () {
   const [checkAllStatus, setCheckAllStatus] = useState(true);
   const params = useLocation();
   const goPage = useNavigate();
   const [content, setContent] = useState([]);
+  let [timeTravel, setTimeTravel] = useState(undefined);
 
-  const queeTask = (data) => {
+  const queeTask = (draftList) => {
     let index = 0;
-    let val = data[index];
-    function quee () {
-        setVideoFraming({ draftIds: [val] }).then((res) => {
-          if (res.code == 200) {
-            console.log(res.data);
-            let timeTravel = setInterval(async() => {
-              let status = await getTaskProgress(val);
-              if(status){
-                clearInterval(timeTravel)
-                ++index
-                val = data[index]
-                if(index==data.length){
-                  return
-                }else{
-                  return quee()
-                } 
+    let draftIdsArr = draftList.map((item) => item.draftId);
+    let val = draftIdsArr[index];
+    function quee() {
+      if(index < draftIdsArr.length){
+        message.info(`${draftList[index].draftName}开始进行抽帧！`);
+      }
+      setVideoFraming({ draftIds: [val] }).then((res) => {
+        if (res.code == 200) {
+          console.log(res.data);
+         let timeInter = setInterval(async () => {
+            let status = await getTaskProgress(val);
+            if (status) {
+              clearInterval(timeInter);
+              setTimeTravel(undefined);
+              ++index;
+              val = draftIdsArr[index];
+              if (index == draftIdsArr.length) {
+                message.success('抽帧任务已全部执行完成！')
+                clearInterval(timeInter);
+                setTimeTravel(undefined);
+                return;
+              } else {
+                return quee();
               }
-              console.log(status,'状态');
-            }, 1000);
-          }
-        });
-    };
-    return quee()
+            }
+            console.log(status, "状态");
+          }, 3000);
+          setTimeTravel(timeInter);
+        }
+      });
+    }
+    return quee();
   };
   // 点击抽帧
   const pushPicture = () => {
     // 筛选出 已勾选的草稿
-    let draftIds = content
-      .filter((item) => item.checked)
-      .map((item) => item.draftId);
-    if (draftIds.length == 0) {
+    let draftList = content.filter((item) => item.checked);
+    if (draftList.length == 0) {
       return message.error("请至少勾选一条草稿！");
-    }else{
-      queeTask(draftIds)
+    } else {
+      queeTask(draftList);
     }
   };
   // 获取任务进度
@@ -88,10 +96,10 @@ export default function () {
         message.error(`${item.draftName}未完成抽帧！无法打开！`);
       });
     } else {
-    let draftIds = checkedData.map((item) => item.draftId);
-    goPage("/Step2PushPicture", {
-      state: { draftIds, taskId: params.state?.taskId },
-    });
+      let draftIds = checkedData.map((item) => item.draftId);
+      goPage("/Step2PushPicture", {
+        state: { draftIds, taskId: params.state?.taskId },
+      });
     }
   };
   // 获取列表数据
@@ -102,22 +110,28 @@ export default function () {
         let {
           data: { draftList },
         } = res;
+        console.log("数据", draftList);
         draftList.forEach((item) => {
           item.checked = true;
           // 转换成相对路径
-          item.draftImage = item.draftImage
-            .split("\\quick")[1]
-            .replaceAll("\\", "/");
+          // item.draftImage = item.draftImage
+          //   .split("\\quick")[1]
+          //   .replaceAll("\\", "/");
+          item.draftImage = convertFileSrc(item.draftImage);
         });
-        setContent(draftList);
+        setContent([...draftList], "god");
       })
       .catch((err) => {
         console.log(err);
       });
   };
   useEffect(() => {
-    console.log(params, "路径参数地址========================================");
     getlist(params.state?.taskId);
+    return () => {
+      console.log(timeTravel,'定时器？？');
+        clearInterval(timeTravel)
+        setTimeTravel(undefined);
+    };
   }, []);
   const checkAll = () => {
     setCheckAllStatus(!checkAllStatus);
@@ -137,7 +151,7 @@ export default function () {
         <div className={style.step}>
           <div>视频抽帧</div>
           <img src={Next} alt='' />
-          <div className={style.stepKey}>反应生图</div>
+          <div className={style.stepKey}>反推生图</div>
           <img src={Next} alt='' />
           <div>合成视频</div>
         </div>
@@ -163,7 +177,15 @@ export default function () {
             {/* item.draftImage  */}
             <img src={item.draftImage} alt='' />
             <div className={style.mask}>
-              <Progress percent={item.draftProgress} type='circle'></Progress>
+              {/* <Progress percent={item.draftProgress} type='circle'></Progress> */}
+              <Progress
+                label
+                status={item.draftProgress == 100 ? "success" : "active"}
+                style={{
+                  width: "80%",
+                }}
+                size='large'
+                percentage={item.draftProgress}></Progress>
             </div>
             <div className={style.itemBottom}>
               <div>{item.draftName}</div>

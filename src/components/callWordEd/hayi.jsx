@@ -1,12 +1,13 @@
 // 海艺版本
 import { useEffect, useState, useRef } from "react";
 import style from "./index.module.less";
-import { Tabs, Collapse, ConfigProvider, Button, message } from "antd";
+import { Tabs, Collapse, ConfigProvider, Button, message, Spin } from "antd";
 import theme from "./componentTheme";
 import { savePrompt } from "@/api/api";
 const App = (props) => {
   const [item, setItem] = useState([]);
   const [content, setContent] = useState([]); // * 所有的prompt数据
+  const [spinning, setSpinning] = useState(false);
   const [panel, setPanel] = useState([]);
   //输出
   const [outPut, setOutPut] = useState([]);
@@ -44,6 +45,7 @@ const App = (props) => {
   ];
 
   const getJson = () => {
+    setSpinning(true);
     return new Promise((resolve) => {
       fetch("/public/json/promot.json")
         .then((res) => res.json())
@@ -88,6 +90,7 @@ const App = (props) => {
                     setInPut(newInput);
                     const result = [...newInput, ...outPut];
                     resolve(result);
+                    console.log(result, "resssssssssssssssssult");
                     setOutPut(result);
                   }
                 });
@@ -95,6 +98,9 @@ const App = (props) => {
             }
             return content;
           });
+        })
+        .finally(() => {
+          setSpinning(false);
         });
     });
   };
@@ -114,8 +120,8 @@ const App = (props) => {
     let arr1 = Object.values(option).flat(2);
     let arr2 = arr1.concat(inPut);
     // 判断是否详情进来outPut已经有数据
-    // if (outPut.length > 0) {
-    //   setOutPut(arr2);
+    // if (inPut.length > 0) {
+    // setOutPut(arr2);
     // } else {
     setOutPut(arr1);
     // }
@@ -136,19 +142,6 @@ const App = (props) => {
     tempOptions[type][index].checked = !option[type][index].checked;
     console.log(tempOptions);
     setOption({ ...tempOptions });
-    // for (let index in outPut) {
-    //   if (!option[type][props.index].checked) {
-    //     if (JSON.stringify(outPut[index]) == JSON.stringify(props.item)) {
-    //       outPut[index].checked = false;
-    //       break;
-    //     }
-    //   } else {
-    //     outPut[index].checked = true;
-    //     break;
-    //   }
-    // }
-    // setOutPut([...outPut]);
-    // setOption({ ...option });
   };
   //切换tabs
   const changeTabs = (e) => {
@@ -329,6 +322,7 @@ const App = (props) => {
 
   async function request() {
     const input = await getJson();
+    console.log("input", input);
     setOutPut(input);
   }
 
@@ -341,14 +335,15 @@ const App = (props) => {
   return (
     <ConfigProvider theme={{ ...theme }}>
       <div className={style.box}>
+        <Spin spinning={spinning} size='large' tip={'加载中..'} className={style.spinBox}></Spin>
         <div className={style.boxTop}>
           <div className={style.left}>
             <div className={style.item}>
               <div className={style.itemTitle}>Input</div>
               <div className={style.itemContent}>
                 <textarea
-                  cols="30"
-                  rows="10"
+                  cols='30'
+                  rows='10'
                   disabled
                   value={
                     inPut
@@ -359,21 +354,15 @@ const App = (props) => {
                       })
                       .filter(Boolean)
                       .toString() ?? ""
-                  }
-                ></textarea>
+                  }></textarea>
               </div>
             </div>
             <div className={style.item}>
               <div className={style.itemTitle}>Ouput</div>
-              <div
-                className={style.itemContent}
-                style={{
-                  marginTop: "30px",
-                }}
-              >
+              <div className={style.itemContent}>
                 <textarea
-                  cols="30"
-                  rows="10"
+                  cols='30'
+                  rows='10'
                   // 筛选出 输出文本数组中 checked==true 的文字 再过滤逗号后字符串化
                   value={
                     outPut
@@ -386,13 +375,12 @@ const App = (props) => {
                       .toString() ?? ""
                   }
                   readOnly
-                  disabled
-                ></textarea>
+                  disabled></textarea>
               </div>
             </div>
           </div>
           <div className={style.center}>
-            {option.normal.length && (
+            {
               <div className={style.one}>
                 <div className={style.itemTitle}>普通</div>
                 <div
@@ -403,8 +391,7 @@ const App = (props) => {
                       type: "normal",
                       callback: (option) => removeSourceItem(option),
                     })
-                  }
-                >
+                  }>
                   {option.normal.map((item, index) => (
                     <div
                       onDragStart={dragStart(item, "normal")}
@@ -416,13 +403,12 @@ const App = (props) => {
                           callback: (option) => removeSourceItem(option),
                         });
                       }}
-                      draggable="true"
+                      draggable='true'
                       className={`${style.itemBox} ${style.draggable} ${
                         !item.checked ? style.disabled : ""
                       }`}
                       key={index}
-                      onClick={() => enOrdis({ item, index }, "normal")}
-                    >
+                      onClick={() => enOrdis({ item, index }, "normal")}>
                       <div className={style.boxLeft}>{item.text}</div>
                       <div className={style.boxRight}>
                         {item.lang ?? item.text}
@@ -431,8 +417,8 @@ const App = (props) => {
                   ))}
                 </div>
               </div>
-            )}
-            {option.style.length && (
+            }
+            {
               <div className={style.two}>
                 <div className={style.itemTitle}>风格</div>
                 <div
@@ -443,8 +429,7 @@ const App = (props) => {
                       type: "style",
                       callback: (option) => removeSourceItem(option),
                     })
-                  }
-                >
+                  }>
                   {option.style.map((item, index) => (
                     <div
                       onDragStart={dragStart(item, "style")}
@@ -456,13 +441,12 @@ const App = (props) => {
                           callback: (option) => removeSourceItem(option),
                         })
                       }
-                      draggable="true"
+                      draggable='true'
                       className={`${style.itemBox} ${style.draggable} ${
                         !item.checked ? style.disabled : ""
                       }`}
                       key={index}
-                      onClick={() => enOrdis({ item, index }, "style")}
-                    >
+                      onClick={() => enOrdis({ item, index }, "style")}>
                       <div className={style.boxLeft}>{item.text}</div>
                       <div className={style.boxRight}>
                         {item.lang ?? item.text}
@@ -471,8 +455,8 @@ const App = (props) => {
                   ))}
                 </div>
               </div>
-            )}
-            {option.quality.length && (
+            }
+            {
               <div className={style.three}>
                 <div className={style.itemTitle}>质量</div>
                 <div
@@ -483,12 +467,13 @@ const App = (props) => {
                       type: "quality",
                       callback: (option) => removeSourceItem(option),
                     })
-                  }
-                >
+                  }>
                   {option.quality.map((item, index) => (
                     <div
                       onDragStart={dragStart(item, "quality")}
                       onDragEnd={dragEnd}
+                      onDragOver={(e) => e.preventDefault()}
+                      useDragHandle
                       onDrop={(e) =>
                         dropHandler(e, {
                           type: "quality",
@@ -496,13 +481,12 @@ const App = (props) => {
                           callback: (option) => removeSourceItem(option),
                         })
                       }
-                      draggable="true"
+                      draggable='true'
                       className={`${style.itemBox} ${style.draggable} ${
                         !item.checked ? style.disabled : ""
                       }`}
                       key={index}
-                      onClick={() => enOrdis({ item, index }, "quality")}
-                    >
+                      onClick={() => enOrdis({ item, index }, "quality")}>
                       <div className={style.boxLeft}>{item.text}</div>
                       <div className={style.boxRight}>
                         {item.lang ?? item.text}
@@ -511,19 +495,18 @@ const App = (props) => {
                   ))}
                 </div>
               </div>
-            )}
+            }
           </div>
           <div className={style.right}>
             <Tabs items={tabsItem} onChange={changeTabs}></Tabs>
-            <div className={style.rightItem}>
-              {Array.isArray(item) &&
-                item.map((val, index) => {
+            {Array.isArray(item) && (
+              <div className={style.rightItem}>
+                {item.map((val, index) => {
                   return (
                     <div
                       className={style.tab1}
                       key={index}
-                      onClick={() => ckItem({ ...val }, index)}
-                    >
+                      onClick={() => ckItem({ ...val }, index)}>
                       <div className={style.boxLeft}>{val.text}</div>
                       <div className={style.boxRight}>
                         {val.lang ?? val.text}
@@ -531,42 +514,46 @@ const App = (props) => {
                     </div>
                   );
                 })}
-            </div>
+              </div>
+            )}
             <div className={style.Collapse}>
               {!Array.isArray(item) && (
-                <Collapse>
-                  {panel.map((val, index) => {
-                    return (
-                      <Collapse.Panel header={val}>
-                        {item[val].map((value, indexs) => {
-                          return (
-                            <div
-                              className={style.tab1}
-                              key={indexs}
-                              onClick={() => ckItem({ ...value }, indexs)}
-                            >
-                              <div className={style.boxLeft}>{value.text}</div>
-                              <div className={style.boxRight}>
-                                {value.lang ?? value.text}
+                <div className={style.rightItem} style={{ display: "block" }}>
+                  <Collapse>
+                    {panel.map((val, index) => {
+                      return (
+                        <Collapse.Panel header={val}>
+                          {item[val].map((value, indexs) => {
+                            return (
+                              <div
+                                className={style.tab1}
+                                key={indexs}
+                                onClick={() => ckItem({ ...value }, indexs)}>
+                                <div className={style.boxLeft}>
+                                  {value.text}
+                                </div>
+                                <div className={style.boxRight}>
+                                  {value.lang ?? value.text}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </Collapse.Panel>
-                    );
-                  })}
-                </Collapse>
+                            );
+                          })}
+                        </Collapse.Panel>
+                      );
+                    })}
+                  </Collapse>
+                </div>
               )}
             </div>
           </div>
-        </div>
-        <div className={style.btnBox}>
-          <Button type="primary" onClick={props.close}>
-            取消
-          </Button>
-          <Button type="primary" onClick={save}>
-            保存
-          </Button>
+          <div className={style.btnBox}>
+            <Button type='primary' onClick={props.close}>
+              取消
+            </Button>
+            <Button type='primary' onClick={save}>
+              保存
+            </Button>
+          </div>
         </div>
       </div>
     </ConfigProvider>

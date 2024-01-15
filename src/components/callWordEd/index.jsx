@@ -1,7 +1,7 @@
 // 提示词编辑器
 import style from "./index.module.less";
-import close from "@/assets/closeWindow.png";
-import drag from "@/assets/drg.png";
+import close from "/public/assets/closeWindow.png";
+import drag from "/public/assets/drg.png";
 import { Tabs, ConfigProvider, Checkbox, Collapse } from "antd";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";

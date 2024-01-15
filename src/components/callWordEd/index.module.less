@@ -12,22 +12,43 @@
 .draggable {
   -webkit-app-region: drag;
 }
-
+.spinBox{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%, 0);
+}
 .box {
-  z-index: 200;
+  position: relative;
+  z-index: 300;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate3d(-50%, -50%, 0);
   width: 85%;
   height: 650px;
-  background: #12121D;
+  // background: #12121D;
+  background: #131313;
   padding: 22px;
-  overflow-y: scroll;
+  // overflow-y: scroll;
 
   .boxTop {
     display: grid;
     grid-template-columns: repeat(3, calc(100%/3));
+    .btnBox {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      box-sizing: border-box;
+      padding: 0 20px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      height: 60px;
+      background: #131313;
+    }
   }
 
   .left {
@@ -35,15 +56,17 @@
     flex-direction: column;
     justify-content: flex-start;
 
+    // justify-content: space-between;
     .item {
       box-sizing: border-box;
       padding: 16px;
-      background: rgba(107, 112, 137, .051);
+      // background: rgba(107, 112, 137, .051);
       border-radius: 16px;
       display: flex;
       flex-direction: column;
       margin-bottom: 15px;
       padding: 16px;
+      background: #272727 !important;
 
       .itemTitle {
         margin-bottom: 8px;
@@ -60,7 +83,8 @@
         color: #5f5c5c;
         flex: none;
         font-size: 14px;
-        height: 270px;
+        height: 240px;
+        background: #272727 !important;
 
         textarea {
           width: 100%;
@@ -82,6 +106,7 @@
   .center {
     .one {
       .Item();
+      background: #272727 !important;
 
       .boxLeft {
         background: @textLeft1;
@@ -96,6 +121,7 @@
 
     .two {
       .Item();
+      background: #272727 !important;
 
       .boxLeft {
         background: @textLeft2;
@@ -110,6 +136,7 @@
 
     .three {
       .Item();
+      background: #272727 !important;
 
       .boxLeft {
         background: @textLeft3;
@@ -129,6 +156,9 @@
       padding: 10px 25px;
       box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, .5);
       background: linear-gradient(90deg, rgba(35, 86, 173, .1), rgba(36, 82, 180, .1));
+      // height: 198px;
+      height: 170px;
+      overflow-y: scroll;
 
       .itemTitle {
         color: #9a9a9a;
@@ -193,13 +223,13 @@
   }
 
   .right {
-    padding: 20px;
+    padding: 0 20px;
+    margin-top: -13px;
 
     .Collapse {
       width: 100%;
       .rightItem();
       .tab2();
-
       .ant-collapse-content-box {
         display: flex !important;
         flex-wrap: wrap !important;
@@ -212,10 +242,12 @@
       display: flex;
       flex-wrap: wrap;
       gap: 5px;
-
+      max-height: 500px;
+      overflow-y: scroll;
       .tab1 {
         .itemBox();
-
+        align-items: unset;
+        width:fit-content;
         .boxLeft {
           background: @textLeft3;
         }
@@ -273,12 +305,4 @@
       }
     }
   }
-}
-
-.btnBox {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 15px;
-  width: 100%;
 }

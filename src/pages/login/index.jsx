@@ -1,21 +1,33 @@
 import style from "./index.module.less";
-import logo from "@/assets/logo.png";
-import close from "@/assets/close.png";
-import indexLogo from "@/assets/indexLogo.png";
-import backGround from "@/assets/loginBack.png";
-import password from "@/assets/password.png";
-import phone from "@/assets/phone.png";
+import ht from "/public/assets/ht.png";
+import close from "/public/assets/close.png";
+import indexLogo from "/public/assets/indexLogo.png";
+import backGround from "/public/assets/loginBack.png";
+import password from "/public/assets/password.png";
+import phone from "/public/assets/phone.png";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setWindowSize } from "@/func/index.js";
-import { userWxLogin, userWxState } from "@/api/api.js";
-import { QRCode } from "antd";
+import { setWindowSize, getImageUrl } from "@/func/index.js";
+import { userWxLogin, userWxState,getActivateState } from "@/api/api.js";
+import { QRCode, message } from "antd";
+import { invoke } from "@tauri-apps/api/tauri";
 const Index = () => {
   const [qrcode, setQrcode] = useState({
     url: "123",
     status: "loading",
   });
   const GoPage = useNavigate();
+    // 查询激活状态
+    const getActivate = () => {
+      getActivateState().then((res) => {
+        if (res.code==200) {
+          sessionStorage.setItem('userActiveStatus','1')
+        } else {
+          sessionStorage.setItem('userActiveStatus','0')
+          GoPage('/index/mine')
+        }
+      });
+    };
   const requestWx = () => {
     setQrcode({
       url: "123",
@@ -33,6 +45,7 @@ const Index = () => {
               console.log(res.data.state);
               // 取消扫码
               if (res.data.state == 403) {
+                message.info("取消扫码！");
                 clearInterval(stateQuery);
                 return requestWx();
               }
@@ -46,6 +59,8 @@ const Index = () => {
                   "userInfo",
                   JSON.stringify(res.data.userinfo)
                 );
+                // 保存用户登录时间
+                localStorage.setItem("loginTime", Date.now());
                 clearInterval(stateQuery);
                 return GoPage("/index/home", { replace: true });
               }
@@ -53,19 +68,20 @@ const Index = () => {
               if (res.data.state == 666) {
                 setQrcode({
                   status: "expired ",
-                  url: "11111",
+                  url: encodeURIComponent("二维码已失效,请刷新"),
                 });
                 return clearInterval(stateQuery);
               }
             });
-          }, 2000);
+          }, 3000);
         }
       })
       .catch((err) => {});
   };
 
   const login = () => {
-    GoPage("/index/home", {
+    // 
+    GoPage("/Step3SyncVideo", {
       state: {},
       replace: true,
     });
@@ -75,6 +91,7 @@ const Index = () => {
   };
   useEffect(() => {
     setWindowSize(987, 572);
+    getActivate()
     requestWx();
   }, []);
   return (
@@ -84,11 +101,10 @@ const Index = () => {
         style={{
           background: `url(${backGround}) no-repeat`,
           backgroundPosition: "center",
-        }}
-      >
+        }}>
         <div className={style.titleBox}>
-          <img src={logo} alt="" />
-          <img src={indexLogo} alt="" />
+          <img src={getImageUrl("ht")} alt='' />
+          <img src={login} alt='' />
           {/*<div className={style.title}>*/}
           {/*    绘唐创作平台*/}
           {/*</div>*/}

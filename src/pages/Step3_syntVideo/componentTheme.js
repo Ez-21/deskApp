@@ -20,6 +20,7 @@ let theme = {
       optionSelectedBg: "#272727",
       colorBorder: "#4B4B4B",
       colorText: "#B0B0B0",
+      
     },
     InputNumber: {
       colorText:'#BDBDBD',

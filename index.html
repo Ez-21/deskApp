@@ -1,19 +1,13 @@
-<!--
- * @Author: Ez-21 2275862144@qq.com
- * @Date: 2023-12-02 02:53:32
- * @LastEditors: w-qianzz 2275862144@qq.com
- * @LastEditTime: 2024-01-09 22:33:58
- * @FilePath: \quick\index.html
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri + React</title>
+    <meta
+        http-equ="Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <title>一键追</title>
 </head>
 
 <body>
@@ -28,9 +22,30 @@
         padding: 0;
     }
 
+    /* 修改td-desgin  腾讯组件库进度条样式*/
+    .t-progress--thin {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        color: white !important;
+    }
+
+    .t-progress__info {
+        margin-top: 10px;
+        color: white !important;
+    }
+
     /*修改antd组件库样式*/
     .ant-progress-text {
         color: white !important;
+    }
+
+    .ant-image {
+        height: 150px !important;
+    }
+
+    :where(.css-dev-only-do-not-override-1mqp9zh).ant-image .ant-image-img {
+        height: 155px !important;
     }
 
     /* 设置滚动条的轨道样式 */
@@ -96,6 +111,12 @@
         background: none !important;
     }
 
+    /* table */
+    :where(.css-dev-only-do-not-override-1mqp9zh).ant-collapse .ant-collapse-content>.ant-collapse-content-box {
+        margin-top: 15px;
+        padding: unset !important;
+    }
+
     /* 分页 */
     :where(.css-dev-only-do-not-override-1mqp9zh).ant-pagination .ant-pagination-item-active {
         background-color: #1E1E1E;
@@ -109,5 +130,4 @@
     :where(.css-dev-only-do-not-override-1mqp9zh).ant-pagination .ant-pagination-item a {
         color: #B0B0B0 !important;
     }
-
 </style>

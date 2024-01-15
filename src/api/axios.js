@@ -1,11 +1,3 @@
-/*
- * @Author: Ez-21 2275862144@qq.com
- * @Date: 2023-12-26 22:52:22
- * @LastEditors: w-qianzz 2275862144@qq.com
- * @LastEditTime: 2024-01-07 14:27:51
- * @FilePath: \quick\src\api\axios.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import Axios from "axios";
 import { message } from "antd";
 const request = Axios.create({
@@ -16,10 +8,20 @@ const request = Axios.create({
   },
 });
 request.interceptors.response.use((res) => {
-  if (res.data.code != 200) {
+  console.log(res.data.code, "code");
+  const code = res.data.code;
+  // if (res.config.url === "/pay/query" && res.data.code === 200) {
+  //    message.success("支付成功！");
+  // }
+  if (code == 200) {
+    return res.data || res;
+  }
+  if (code == 500) {
     message.error(res?.data.msg);
     return;
   }
-  return res.data;
+  if (res.config.url == "/pay/query") {
+    return res.data;
+  }
 });
 export default request;

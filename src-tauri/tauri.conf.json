@@ -11,6 +11,11 @@
   },
   "tauri": {
     "allowlist": {
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": ["http://**", "https://**", "http://127.0.0.1:81"]
+      },
       "dialog": {
         "all": true,
         "open": true
@@ -20,11 +25,8 @@
         "scope": ["$APP/databases/*"]
       },
       "protocol": {
-        "all": false,
         "asset": true,
-        "assetScope": [
-          "$PICTURE"
-        ]
+        "assetScope": ["**"]
       },
       "all": true,
       "window": {
@@ -38,16 +40,13 @@
       },
       "shell": {
         "all": false,
-        "open": true
+        "open": true,
+        "execute": true
       }
-    },
-    "security": {
-      "csp": "default-src 'self'; img-src 'self'; asset: https://asset.localhost"
     },
     "bundle": {
       "active": true,
-      "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.tauri.build",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -56,16 +55,16 @@
         "icons/icon.ico"
       ]
     },
-
     "windows": [{
       "center": true,
       "fullscreen": false,
       "resizable": true,
-      "title": "quick",
+      "title": "一键追爆款",
       "width": 987,
       "height": 572,
       "decorations": true,
-      "theme": "Dark"
+      "theme": "Dark",
+      "fileDropEnabled": false
     }]
   }
 }

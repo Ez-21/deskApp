@@ -1,6 +1,6 @@
 import style from "./index.module.less";
-import ModelSet from "@/assets/modelSet.png";
-import Ques from "@/assets/ques.png";
+import ModelSet from "/public/assets/modelSet.png";
+import Ques from "/public/assets/ques.png";
 import { Select, Slider, InputNumber, Button, message } from "antd";
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { ConfigProvider } from "antd";
@@ -39,6 +39,8 @@ const App = (props, ref) => {
   const getModel = () => {
     getSdModel("sd-models").then((res) => {
       console.log(res, "sd模型配置");
+      form.modelId = res.data.list[0].value
+      setForm(form)
       setOptions(res.data.list);
     });
   };

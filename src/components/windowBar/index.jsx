@@ -1,7 +1,7 @@
 import style from './index.module.less'
-import min from '@/assets/min.png'
-import max from '@/assets/max.png'
-import close from '@/assets/closeWindow.png'
+import min from '/public/assets/min.png'
+import max from '/public/assets/max.png'
+import close from '/public/assets/closeWindow.png'
 import {Modal} from 'antd';
 // 导入窗口自定义功能
 import {

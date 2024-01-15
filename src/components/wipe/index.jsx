@@ -1,5 +1,5 @@
 import style from './index.module.less'
-import close from '@/assets/closeWindow.png'
+import close from '/public/assets/closeWindow.png'
 const App = ({setWipeStatus})=>{
     return(
         <div className={style.box}>

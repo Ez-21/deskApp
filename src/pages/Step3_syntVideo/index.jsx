@@ -1,21 +1,14 @@
-/*
- * @Author: w-qianzz 2275862144@qq.com
- * @Date: 2023-12-14 21:19:01
- * @LastEditors: w-qianzz 2275862144@qq.com
- * @LastEditTime: 2024-01-10 01:44:09
- * @FilePath: \quick\src\pages\Step3_syntVideo\index.jsx
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import BackBar from "@/components/backBar";
 import style from "./index.module.less";
-import Next from "@/assets/next.png";
-import ClearTye from "@/assets/clearEye.png";
-import creatRight from "@/assets/createRight.png";
-import createDown from "@/assets/createDown.png";
-import createSet from "@/assets/createSet.png";
-import ModelSet from "@/assets/modelSet.png";
-import Ques from "@/assets/ques.png";
+import Next from "/public/assets/next.png";
+import ClearTye from "/public/assets/clearEye.png";
+import creatRight from "/public/assets/createRight.png";
+import createDown from "/public/assets/createDown.png";
+import createSet from "/public/assets/createSet.png";
+import ModelSet from "/public/assets/modelSet.png";
+import Ques from "/public/assets/ques.png";
 import theme from "./componentTheme";
+import delOften from "/public/assets/delOften.png";
 import {
   Tabs,
   Switch,
@@ -28,10 +21,20 @@ import {
   Slider,
   InputNumber,
   message,
+  Spin,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SortableContainer, SortableElement } from 'react-sortable-hoc';
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import { convertFileSrc } from "@tauri-apps/api/tauri";
+
+// 导入配音文件
+import styleDub from "../../../public/dubData/style"; //风格
+import voicesDub from "../../../public/dubData/voices"; //音色
+import roleDub from "../../../public/dubData/role"; //角色
+import rateDub from "../../../public/dubData/rate"; //语速
+import pitchDub from "../../../public/dubData/pitch"; //语调
+
 import {
   getVideoProgress,
   generateVideo,
@@ -40,6 +43,7 @@ import {
   generateAudio,
   generateAllFrame,
   pushAloneVideoFrame,
+  generateAudioOne,
 } from "@/api/api";
 const { Option } = Select;
 function getImageUrl(name) {
@@ -49,47 +53,13 @@ export default () => {
   const { Panel } = Collapse;
   const go = useNavigate();
   const params = useLocation();
+  const [spinging, setSpinging] = useState(false);
   const [showComp, setShowComp] = useState(1);
+  const [offtenArr, setOfftenArr] = useState([]);
   const [detial, setDetial] = useState();
   const [show, setShow] = useState(false);
   const [paramsData, setParamsData] = useState(params.state);
   var { draftIds, modelType } = params;
-  const [voiceSetting, setVoiceSetting] = useState({
-    soundModel: "",
-    soundSpeed: "",
-    volume: "",
-  });
-  const [voice, setVoice] = useState([
-    {
-      label: "中文普通话-云溪(男) ",
-      value: "zh-CN-YunxiNeural",
-    },
-  ]);
-  const changeVoice = (e) => {
-    console.log(e);
-    voiceSetting.soundModel = e;
-    setVoiceSetting({ ...voiceSetting });
-  };
-  // 创建可排序的子项组件
-const SortableItem = SortableElement(({ value,index }) => (
-    <div className={style.leftItem} key={index}>
-    <div className={style.drag}>
-      <img src={getImageUrl("drg")} alt='' />
-    </div>
-    <div className={style.icon}>
-      <img src={getImageUrl("001")} alt='' />
-      {value.name}
-    </div>
-  </div>
-));
-// 创建可排序的父容器组件
-const SortableList = SortableContainer(({ items }) => (
-  <div>
-    {checkFrame&&checkFrame.map((value, index) => (
-      <SortableItem key={`item-${index}`} index={index} value={value} />
-    ))}
-  </div>
-));
   // 关键帧数据
   const [keyFramesList, setkeyFramesList] = useState([
     {
@@ -123,53 +93,109 @@ const SortableList = SortableContainer(({ items }) => (
       checked: false,
     },
   ]);
+  const DomStyle = {
+    color: "white",
+    background: "#1755FF",
+  };
   const [checkFrame, setCheckFrame] = useState([]);
   const [state, setState] = useState([
     { id: 1, name: "shrek" },
     { id: 2, name: "fiona" },
   ]);
+  const [voiceSetting, setVoiceSetting] = useState({
+    name: "", //角色，
+    pitch: 1, //语调
+    rate: 1, //语速
+    role: "", //角色
+    style: "", //风格
+  });
+  // 点击音色
+  const setVoice = (item, index) => {
+    voiceSetting.name = item.name;
+    setVoiceSetting({ ...voiceSetting });
+  };
+  // 点击角色
+  const setRole = (item, index) => {
+    voiceSetting.role = item.keyword;
+    setVoiceSetting({ ...voiceSetting });
+  };
+  // 点击风格
+  const setStyle = (item, index) => {
+    voiceSetting.style = item.keyword;
+    setVoiceSetting({ ...voiceSetting });
+  };
+  // 点击语速
+  const setRate = (item, index) => {
+    voiceSetting.rate = item.value;
+    setVoiceSetting({ ...voiceSetting });
+  };
+  // 点击语调
+  const setPitch = (item, index) => {
+    voiceSetting.pitch = item.value;
+    setVoiceSetting({ ...voiceSetting });
+  };
+  // 处理子元素排序后的回调函数
+  const onSortEnd = ({ oldIndex, newIndex }) => {
+    setCheckFrame((prevItems) => {
+      const newItems = [...prevItems];
+      const [removed] = newItems.splice(oldIndex, 1);
+      newItems.splice(newIndex, 0, removed);
+      return newItems;
+    });
+  };
+  // 创建可排序的子项组件
+  const SortableItem = SortableElement(({ value, index }) => (
+    <div className={style.leftItem}>
+      <div className={style.drag}>
+        <img src={getImageUrl("drg")} alt='' />
+      </div>
+      <div className={style.icon}>
+        <img src={getImageUrl("001")} alt='' />
+        {value.name}
+      </div>
+    </div>
+  ));
+  // 创建可排序的父容器组件
+  const SortableList = SortableContainer(({ items }) => (
+    <div>
+      {items &&
+        items.map((value, index) => (
+          <SortableItem key={`item-${index}`} index={index} value={value} />
+        ))}
+    </div>
+  ));
+
   const doFrame = () => {
     setShow(!show);
-  };
-  const getVoiceHand = () => {
-    getVoice().then((res) => {
-      console.log(res, "音色数据");
-      setVoice(res.data.list);
-    });
   };
 
   const getDetial = () => {
     getVideoDetail(paramsData).then(({ data }) => {
       data.draftList.forEach((element) => {
         // 关键帧数据
-        element.keyFrameList = JSON.parse(JSON.stringify(keyFramesList));
+        // element.keyFrameList = JSON.parse(JSON.stringify(keyFramesList));
         element.checked = false;
         element.storyboardList.forEach((item) => {
+          item.keyFrameStyle = item.keyFrameStyle.toString();
           item.spinning = false;
+          // item.keyFrameStyleList = [...keyFramesList] //断开引用地址
+          if (item.soundPath) {
+            item.soundPath = convertFileSrc(item.soundPath);
+          }
           // 设置原图地址
-          item.orignImagePath = item.orignImagePath
-            .split("quick")[1]
-            .replaceAll("\\", "/");
-          // 设置仿图图片地址 sd为单张图  mj多张 所以进行数组判断
+          item.orignImagePath = convertFileSrc(item.orignImagePath);
+          // 设置仿图图片地址
           if (item.currentImageList && item.currentImageList.length != 0) {
-            if (Array.isArray(item.currentImageList)) {
-              item.currentImageList.forEach((val, index) => {
-                item.currentImageList[index] = item.currentImageList[index]
-                  .split("quick")[1]
-                  .replaceAll("\\", "/");
-              });
-            } else {
-              item.currentImageList = item.currentImageList
-                .split("quick")[1]
-                .replaceAll("\\", "/");
-            }
+            item.currentImage = convertFileSrc(
+              item.currentImageList[item.currentImageIndex ?? 0]
+            );
           }
           // 设置历史记录图片地址
           if (item.historyImageList && item.historyImageList.length != 0) {
             item.historyImageList.forEach((val, index) => {
-              item.historyImageList[index] = item.historyImageList[index]
-                .split("quick")[1]
-                .replaceAll("\\", "/");
+              item.historyImageList[index] = convertFileSrc(
+                item.historyImageList[index]
+              );
             });
           }
         });
@@ -182,30 +208,93 @@ const SortableList = SortableContainer(({ items }) => (
     return await getVideoProgress({ draftId });
   };
   // 生成音频接口
-  const createAio = (draftId) => {
+  const createAio = (draftIds) => {
+    console.log(voiceSetting, "生成音频===");
+    setSpinging(true);
+    // 用户不带的不选择参数
+    let dataObj = {};
+    for (let key in voiceSetting) {
+      if (voiceSetting[key]) {
+        dataObj[key] = voiceSetting[key];
+      }
+    }
     generateAudio({
-      draftId,
-      ...voiceSetting,
-      modelType: paramsData.modelType,
-    }).then((res) => {
-      console.log(res, "生成音频接口数据");
-    });
+      draftIds,
+      ...dataObj,
+      // modelType: paramsData.modelType,
+    })
+      .then((res) => {
+        console.log(res, "音频数据");
+        if (res.code == 200) {
+          message.success("音频生成成功！");
+          // 重新设置常用音频
+          let strageData = localStorage.getItem("offtenVoice");
+          if (strageData) {
+            let offtenVoice = JSON.parse(strageData);
+            if (offtenVoice) {
+              // 常用音色保留3个
+              if (offtenVoice.length == 3) {
+                offtenVoice.shift();
+              }
+              offtenVoice.push(voiceSetting);
+              localStorage.setItem("offtenVoice", JSON.stringify(offtenVoice));
+            }
+          } else {
+            localStorage.setItem("offtenVoice", JSON.stringify([voiceSetting]));
+          }
+          for (let key in voiceSetting) {
+            voiceSetting[key] = "";
+          }
+          setVoiceSetting({ ...voiceSetting });
+          getOfftenVoice();
+        }
+        console.log(res, "生成音频接口数据");
+      })
+      .finally(() => {
+        getDetial();
+        setSpinging(false);
+      });
   };
-  // 生成音频
+  // 生成音频接口
   const createAudio = () => {
     let checkEdList = detial.filter((item) => item.checked);
     console.log(checkEdList, "????");
-    let ids = checkEdList.map((item) => item.draftId);
-    console.log(ids, "ids");
+    let draftIds = checkEdList.map((item) => item.draftId);
     if (checkEdList.length == 0) {
-      return message.error("至少选择一条草稿！");
+      return message.info("至少选择一条草稿！");
     }
-    queeTask(
-      ids,
-      createAio
-    )((res) => {
-      console.log(res);
-    });
+    if (!voiceSetting.name) {
+      return message.info("请选择一条音色！");
+    }
+    message.info("开始生成音频！");
+    createAio(draftIds);
+  };
+  // 单独重新生成音频
+  const resetVoice = (record) => {
+    let dataObj = {};
+    for (let key in voiceSetting) {
+      console.log(voiceSetting[key], "???");
+      if (voiceSetting[key]) {
+        dataObj[key] = voiceSetting[key];
+      }
+    }
+    generateAudioOne({
+      paragraphId: record.id,
+      ...dataObj,
+    })
+      .then((res) => {
+        console.log(res, "重新生成");
+        if (res.code == 200) {
+          message.success("重新配音成功");
+        }
+        for (let key in voiceSetting) {
+          voiceSetting[key] = "";
+        }
+        setVoiceSetting({ ...voiceSetting });
+      })
+      .finally(() => {
+        getDetial();
+      });
   };
   const columns = [
     {
@@ -223,6 +312,7 @@ const SortableList = SortableContainer(({ items }) => (
     {
       title: "原图",
       dataIndex: "orignImagePath",
+      fixed: "left",
       width: 180,
       render: (val) => {
         return <img src={val} alt='' className={style.tableImg} />;
@@ -230,12 +320,13 @@ const SortableList = SortableContainer(({ items }) => (
     },
     {
       title: "本镜文案",
-      dataIndex: "orignText",
+      dataIndex: "rewriteText",
       width: 180,
       render: (val) => {
         return <div className={style.TableTextBox}>{val}</div>;
       },
     },
+
     {
       title: "配音",
       dataIndex: "soundPath",
@@ -243,28 +334,45 @@ const SortableList = SortableContainer(({ items }) => (
       render: (val, record) => {
         return (
           <div>
-            <audio
-              controls
-              src={val}
-              style={{
-                width: "120px",
-              }}></audio>
+            {val ? (
+              <div className={style.audioBox}>
+                <audio
+                  controls
+                  src={val}
+                  style={{
+                    width: "120px",
+                  }}></audio>
+                <div onClick={() => resetVoice(record)}>重新配音</div>
+              </div>
+            ) : (
+              <div></div>
+            )}
           </div>
         );
       },
     },
+    // currentImageIndex
+    {
+      title: "仿图",
+      dataIndex: "currentImage",
+      fixed: "left",
+      width: 180,
+      render: (val) => {
+        return <img src={val} alt='' className={style.tableImg} />;
+      },
+    },
     {
       title: "关键帧",
-      dataIndex: "address",
+      dataIndex: "keyFrameStyle",
       width: 180,
       render: (val, record) => {
         return (
           <div className={style.selectFrame}>
             <Select
               style={{ width: "90%" }}
-              placeholder='请选择'
-              onChange={() => changeAloneFrame(val, record)}>
-              {keyFramesList.map((item, index) => (
+              value={val}
+              onChange={(e) => changeAloneFrame(record, e)}>
+              {keyFramesList.map((item) => (
                 <Select.Option key={item.value} value={item.value}>
                   {item.name}
                 </Select.Option>
@@ -312,14 +420,13 @@ const SortableList = SortableContainer(({ items }) => (
                     }
                   : null
               }></div>
-            {data.storyboardList[0].soundPath ? "已识别到音频路径" : "未识别到音频路径"}
+            {data.storyboardList[0].soundPath
+              ? "已识别到音频路径"
+              : "未识别到音频路径"}
           </div>
         </div>
       </div>
     );
-  };
-  const onChange = (key) => {
-    console.log(key);
   };
   const frameCheck = (index) => {
     keyFramesList[index].checked = !keyFramesList[index].checked;
@@ -336,14 +443,6 @@ const SortableList = SortableContainer(({ items }) => (
     console.log(val);
   };
 
-  const onChangeSoundSpeed = (newValue) => {
-    voiceSetting.soundSpeed = newValue;
-    setVoiceSetting({ ...voiceSetting });
-  };
-  const onChangeVolume = (newValue) => {
-    voiceSetting.volume = newValue;
-    setVoiceSetting({ ...voiceSetting });
-  };
   const queeTask = (data, func) => {
     let idData = [];
     let index = 0;
@@ -359,32 +458,43 @@ const SortableList = SortableContainer(({ items }) => (
       } else {
         return quee();
       }
-      // rej({
-      //   status: "error",
-      // });
     }
     return quee;
   };
   // 调用合成视频接口
   const createVio = (draftId) => {
+    setSpinging(true);
     generateVideo({
       draftId,
-      modeltype: paramsData.modelType,
-    }).then(({ data }) => {
-      console.log(data, "合成视频接口");
-      if (data.id) {
-        // draftId
-        let progressData = getProgress(data.id);
-        console.log(progressData, "合成视频进度");
-      }
-    });
+      modelType: paramsData.modelType,
+    })
+      .then((res) => {
+        if (res.code) {
+          message.success("合成视频成功！");
+        }
+        getDetial();
+        console.log(draft_id, "合成视频接口");
+      })
+      .finally(() => {
+        setSpinging(false);
+      });
   };
   // 点击合成视频
   const goNextStep = () => {
     let checkEdList = detial.filter((item) => item.checked);
     if (checkEdList.length == 0) {
-      return message.error("至少选择一条草稿！");
+      return message.info("至少选择一条草稿！");
     }
+    let result = checkEdList
+      .map((item) => item.storyboardList)
+      .flat(2)
+      .every((item) => item.rewriteText && item.currentImage && item.soundPath);
+    if (!result) {
+      return message.error(
+        "数据不可空，请完善仿图、配音、本镜文案后再进行合成视频！"
+      );
+    }
+    message.info("开始进行视频合成！");
     let draftId = checkEdList.map((item) => item.draftId);
     queeTask(draftId, createVio)(
       (res) => {
@@ -403,17 +513,20 @@ const SortableList = SortableContainer(({ items }) => (
   // 关闭
   const closeFrame = () => {
     setShow(!show);
+    setCheckFrame([]);
+    keyFramesList.forEach((item) => (item.checked = false));
+    setkeyFramesList([...keyFramesList]);
   };
   // 一键轮询关键帧
   const oneKeyFrame = () => {
     let checkEdList = detial.filter((item) => item.checked);
-    console.log(checkEdList);
     let keyFrameList = checkFrame
       .map((item) => item.value)
       .map((item) => item.split(","));
     if (checkEdList.length == 0) {
-      return message.error("至少选择一条草稿！");
+      return message.info("至少选择一条草稿！");
     } else {
+      message.info("开始进行关键帧轮询");
       let ids = checkEdList.map((item) => item.draftId);
       let fn = async (draftId) => {
         return await generateAllFrame({
@@ -435,17 +548,57 @@ const SortableList = SortableContainer(({ items }) => (
     }
   };
   // 单独关键帧
-  const changeAloneFrame = (val, data) => {
-    console.log(123456);
+  const changeAloneFrame = (data, val) => {
+    console.log({ data, val });
+    data.keyFrameStyle = val;
+    setDetial([...detial]);
     pushAloneVideoFrame({
       storyboardId: data.id,
-      keyframeStyle: undefined,
+      keyframeStyle: val.split(","),
     }).then((res) => {
       console.log(res);
+      getDetial();
+      message.success("设置分镜关键帧成功");
     });
   };
+  const getOfftenVoice = () => {
+    let strageData = localStorage.getItem("offtenVoice");
+    if (strageData) {
+      let offtenVoice = JSON.parse(strageData);
+      if (offtenVoice) {
+        offtenVoice.forEach((item, index) => {
+          console.log(item, "item");
+          item.styleText =
+            styleDub.find((val) => val.keyword == item.style)?.word ?? "--";
+          item.nameText =
+            voicesDub.find((val) => val.name == item.name)?.LocalName ?? "--";
+          item.roleText =
+            roleDub.find((val) => val.keyword == item.role)?.word ?? "--";
+          item.rateText =
+            rateDub.find((val) => val.value == item.rate)?.name ?? "--";
+          item.pitchText =
+            pitchDub.find((val) => val.value == item.pitch)?.name ?? "--";
+        });
+        setOfftenArr(offtenVoice);
+      }
+    }
+  };
+  // 点击常用音色配置
+  const offtenItemCk = (item) => {
+    for (let key in voiceSetting) {
+      voiceSetting[key] = item[key];
+    }
+    setVoiceSetting({ ...voiceSetting });
+  };
+  // 删除常用音色
+  const delOftenHandle = (index, event) => {
+    event.stopPropagation();
+    offtenArr.splice(index, 1);
+    localStorage.setItem("offtenVoice", JSON.stringify(offtenArr));
+    setOfftenArr([...offtenArr]);
+  };
   useEffect(() => {
-    getVoiceHand();
+    getOfftenVoice();
     getDetial();
   }, []);
   return (
@@ -460,7 +613,7 @@ const SortableList = SortableContainer(({ items }) => (
           <div className={style.step}>
             <div>视频抽帧</div>
             <img src={Next} alt='' />
-            <div>反应生图</div>
+            <div>反推生图</div>
             <img src={Next} alt='' />
             <div className={style.stepKey}>合成视频</div>
           </div>
@@ -468,7 +621,7 @@ const SortableList = SortableContainer(({ items }) => (
             <div className={style.frame} onClick={goBeforeStep}>
               上一步
             </div>
-            <div className={style.frame} onClick={goNextStep}>
+            <div className={style.frame} onClick={spinging ? null : goNextStep}>
               合成视频
             </div>
           </div>
@@ -477,83 +630,138 @@ const SortableList = SortableContainer(({ items }) => (
           <div className={style.tabContent}>
             <div className={style.bottomContent}>
               <div className={style.left}>
-                <div>
-                  <div>
-                    <div className={style.title}>
-                      <img src={ModelSet} alt='' />
-                      配音配置
+                <div className={style.leftContent}>
+                  <div className={style.title}>
+                    <img src={ModelSet} alt='' />
+                    配音配置
+                  </div>
+                  <div className={style.offten}>
+                    {offtenArr.map((item, index) => {
+                      return (
+                        <div
+                          className={style.offtenItem}
+                          onClick={() => offtenItemCk(item)}>
+                          <a className={style.itemWord} title={item.nameText}>
+                            {item.nameText}
+                          </a>
+                          <a className={style.itemWord} title={item.roleText}>
+                            {item.roleText}
+                          </a>
+                          <a className={style.itemWord} title={item.styleText}>
+                            {item.styleText}
+                          </a>
+                          <a className={style.itemWord} title={item.rateText}>
+                            {item.rateText}
+                          </a>
+                          <a className={style.itemWord} title={item.pitchText}>
+                            {item.pitchText}
+                          </a>
+                          <img
+                            src={delOften}
+                            alt=''
+                            onClick={(e) => delOftenHandle(index, e)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className={style.setItem2}>
+                    <div className={style.title}>音色</div>
+                    <div className={style.voiceItemContent}>
+                      {voicesDub.map((item, index) => {
+                        return (
+                          <div
+                            onClick={() => setVoice(item, index)}
+                            key={index}
+                            style={
+                              voiceSetting.name === item.name ? DomStyle : null
+                            }
+                            className={style.voiceItem}>
+                            {item.LocalName}
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div className={style.setItem1}>
-                      <div className={style.title}>
-                        音色设置
-                        <img src={Ques} alt='' />
-                      </div>
-                      <Select
-                        placeholder='请选择'
-                        value={voiceSetting.soundModel}
-                        style={{
-                          width: "60%",
-                        }}
-                        onChange={changeVoice}>
-                        {voice.map((item) => {
-                          return (
-                            <Select.Option key={item.value} value={item.value}>
-                              {item.label}
-                            </Select.Option>
-                          );
-                        })}
-                      </Select>
+                  </div>
+                  <div className={style.setItem2}>
+                    <div className={style.title}>角色</div>
+                    <div className={style.voiceItemContent}>
+                      {roleDub.map((item, index) => {
+                        return (
+                          <a
+                            title={item.word}
+                            onClick={() => setRole(item, index)}
+                            style={
+                              voiceSetting.role === item.keyword
+                                ? DomStyle
+                                : null
+                            }
+                            key={index}
+                            className={style.voiceItem}>
+                            {item.word}
+                          </a>
+                        );
+                      })}
                     </div>
-                    <div className={style.setItem2}>
-                      <div className={style.title}>
-                        音速
-                        <img src={Ques} alt='' />
-                      </div>
-                      <div className={style.slider}>
-                        <Slider
-                          onChange={onChangeSoundSpeed}
-                          value={voiceSetting.soundSpeed}
-                          min={20}
-                          max={40}
-                          defaultValue={voiceSetting.soundSpeed}></Slider>
-                        <InputNumber
-                          min={20}
-                          max={40}
-                          defaultValue={voiceSetting.soundSpeed}
-                          style={{
-                            margin: "0 16px",
-                          }}
-                          step={0.01}
-                          placeholder='请选择'
-                          value={voiceSetting.soundSpeed}
-                          onChange={onChangeSoundSpeed}></InputNumber>
-                      </div>
+                  </div>
+                  <div className={style.setItem2}>
+                    <div className={style.title}>风格</div>
+                    <div className={style.voiceItemContent}>
+                      {styleDub.map((item, index) => {
+                        return (
+                          <a
+                            key={index}
+                            title={item.word}
+                            onClick={() => setStyle(item, index)}
+                            style={
+                              voiceSetting.style === item.keyword
+                                ? DomStyle
+                                : null
+                            }
+                            className={style.voiceItem}>
+                            {item.word}
+                          </a>
+                        );
+                      })}
                     </div>
-                    <div className={style.setItem2}>
-                      <div className={style.voice}>
-                        音量
-                        <Switch />
-                      </div>
-                      <div className={style.slider}>
-                        <Slider
-                          onChange={onChangeVolume}
-                          step={0.01}
-                          value={voiceSetting.volume}
-                          min={0}
-                          max={1}
-                          defaultValue={voiceSetting.volume}></Slider>
-                        <InputNumber
-                          min={0}
-                          max={1}
-                          placeholder='请选择'
-                          style={{
-                            margin: "0 16px",
-                          }}
-                          defaultValue={voiceSetting.volume}
-                          step={0.01}
-                          value={voiceSetting.volume}
-                          onChange={onChangeVolume}></InputNumber>
-                      </div>
+                  </div>
+                  <div className={style.setItem2}>
+                    <div className={style.title}>语速</div>
+                    <div className={style.voiceItemContent}>
+                      {rateDub.map((item, index) => {
+                        return (
+                          <div
+                            key={index}
+                            onClick={() => setRate(item, index)}
+                            style={
+                              voiceSetting.rate === item.value ? DomStyle : null
+                            }
+                            className={style.voiceItem}>
+                            {item.name}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className={style.setItem2}>
+                    <div className={style.title}>语调</div>
+                    <div className={style.voiceItemContent}>
+                      {pitchDub.map((item, index) => {
+                        return (
+                          <div
+                            key={index}
+                            onClick={() => setPitch(item, index)}
+                            style={
+                              voiceSetting.pitch === item.value
+                                ? DomStyle
+                                : null
+                            }
+                            className={style.voiceItem}>
+                            {item.name}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -569,8 +777,8 @@ const SortableList = SortableContainer(({ items }) => (
                       <img src={ClearTye} alt='' />
                       自动识别音频路径
                     </div> */}
-                    <div onClick={createAudio}>生成音频</div>
-                    <div onClick={doFrame}>一键关键帧</div>
+                    <div onClick={spinging ? null : createAudio}>生成音频</div>
+                    <div onClick={spinging ? null : doFrame}>一键关键帧</div>
                   </div>
                 </div>
                 {show && (
@@ -579,26 +787,16 @@ const SortableList = SortableContainer(({ items }) => (
                     <div className={style.modalContent}>
                       <div className={style.contentLeft}>
                         <div>
-                        <SortableList></SortableList>
-                              {/* {checkFrame &&
-                              checkFrame.map((item, index) => (
-                                <div className={style.leftItem} key={index}>
-                                  <div className={style.drag}>
-                                    <img src={getImageUrl("drg")} alt='' />
-                                  </div>
-                                  <div className={style.icon}>
-                                    <img src={getImageUrl("001")} alt='' />
-                                    {item.name}
-                                  </div>
-                                </div>
-                              ))} */}
-
+                          <SortableList
+                            items={checkFrame}
+                            onSortEnd={onSortEnd}
+                            axis='y'></SortableList>
                         </div>
                       </div>
                       <div className={style.contentRight}>
                         <div>
                           {keyFramesList.map((item, index) => (
-                            <div className={style.rightItem} key={item.label}>
+                            <div className={style.rightItem} key={item.name}>
                               <div className={style.one}>
                                 <Checkbox
                                   onChange={() => frameCheck(index)}
@@ -628,25 +826,29 @@ const SortableList = SortableContainer(({ items }) => (
                   style={{
                     marginTop: "28px",
                   }}>
-                  {/* onChange={onChange} */}
-                  <Collapse
-                    expandIcon={() => null}
-                    showArrow={false}
-                    style={{
-                      color: "white",
-                    }}>
-                    {detial &&
-                      detial?.map((item, index) => (
-                        <Panel
-                          key={item.draftId}
-                          header={<Header data={item} index={index}></Header>}>
-                          <Table
-                            rowKey='id'
-                            dataSource={item.storyboardList}
-                            columns={columns}></Table>
-                        </Panel>
-                      ))}
-                  </Collapse>
+                  <Spin spinning={spinging}>
+                    <Collapse
+                      expandIcon={() => null}
+                      showArrow={false}
+                      style={{
+                        color: "white",
+                      }}>
+                      {detial &&
+                        detial?.map((item, index) => (
+                          <Panel
+                            key={item.draftId}
+                            header={
+                              <Header data={item} index={index}></Header>
+                            }>
+                            <Table
+                              pagination={false}
+                              rowKey='id'
+                              dataSource={item.storyboardList}
+                              columns={columns}></Table>
+                          </Panel>
+                        ))}
+                    </Collapse>
+                  </Spin>
                 </div>
               </div>
             </div>

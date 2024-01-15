@@ -1,17 +1,21 @@
 import style from "./index.module.less";
-import ModalAdd from "@/assets/modelAdd.png";
-import ModelSet from "@/assets/modelSet.png";
-import Rubbish from "@/assets/rubbish.png";
-import Ques from "@/assets/ques.png";
-import { useEffect, useState } from "react";
+import ModalAdd from "/public/assets/modelAdd.png";
+import ModelSet from "/public/assets/modelSet.png";
+import Rubbish from "/public/assets/rubbish.png";
+import Ques from "/public/assets/ques.png";
+import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { Select, Tabs, Checkbox, InputNumber } from "antd";
 import { ConfigProvider } from "antd";
 import theme from "./componentTheme";
 import { getGlobalStyle } from "@/api/api.js";
-const App = () => {
+const App = (props, ref) => {
+  useImperativeHandle(ref, () => {
+    return {};
+  });
   const [callShow, setCallShow] = useState(false);
-  const [tabIndex, setTabIndex] = useState(1);
-  const [viewIndex, setViewIndex] = useState(1);
+  const [tabIndex, setTabIndex] = useState(0);
+  const [viewIndex, setViewIndex] = useState(0);
+  const [checkEdArr, setCheckEdArr] = useState([]);
   const modal = [
     { value: "1", label: "1:1" },
     { value: "2", label: "3:2" },
@@ -19,36 +23,12 @@ const App = () => {
     { value: "4", label: "7:4" },
     { value: "custom", label: "自定义" },
   ];
+  const [styleList, setStyleList] = useState([]);
   const [modalVal, setModalVal] = useState(modal);
   const [checkItem, setCheckItem] = useState([]);
-  const [tabs, setTabs] = useState([
-    {
-      key: 1,
-      label: "风格&媒介",
-    },
-    {
-      key: 2,
-      label: "视角",
-    },
-    {
-      key: 3,
-      label: "场景",
-    },
-    {
-      key: 4,
-      label: "光照",
-    },
-    {
-      key: 5,
-      label: "渲染",
-    },
-    {
-      key: 6,
-      label: "精度",
-    },
-  ]);
-  const changeTab = (id) => {
-    setTabIndex(id);
+  const [tabs, setTabs] = useState([]);
+  const changeTab = (index) => {
+    setTabIndex(index);
   };
   const viewChange = (val) => {
     setViewIndex(val);
@@ -56,9 +36,68 @@ const App = () => {
   // 获取全局风格
   const getMjStyle = () => {
     getGlobalStyle().then((res) => {
-      console.log(res, "全局风格");
+      res.data.dictList.forEach((item) => {
+        item.list.forEach((val) => {
+          val.checkEd = false;
+        });
+      });
+      let dataList = res.data.dictList;
+      let newArr = dataList.map((item) => item.list);
+      setStyleList(newArr);
+      //  提取style类型
+      let typeList = dataList.map((item, index) => ({
+        label: item.type,
+        key: index,
+      }));
+      setTabs(typeList);
     });
   };
+  const changeStyleTab = (index) => {
+    console.log(index);
+    setTabIndex(index);
+  };
+  // 选择提示词
+  const changeCheck = (index) => {
+    let valItem = styleList[tabIndex][index];
+    valItem.checkEd = !valItem.checkEd;
+    if (valItem.checkEd) {
+      if (typeof checkEdArr[tabIndex] == "undefined") {
+        checkEdArr[tabIndex] = [];
+      }
+      checkEdArr[tabIndex].push(valItem);
+    } else {
+      console.log(valItem, "勾选的");
+      checkEdArr[tabIndex].forEach((item, index) => {
+        if (valItem.value == item.value) {
+          checkEdArr[tabIndex].splice(index,1)
+        }
+      });
+    }
+    setCheckEdArr([...checkEdArr]);
+    setStyleList([...styleList]);
+  };
+  // 删除左侧
+  const delItem = (val, index) => {
+    checkEdArr[tabIndex].splice(index, 1);
+    styleList[tabIndex].forEach((item) => {
+      if (item.value == val.value) {
+        item.checkEd = false;
+      }
+    });
+    setCheckEdArr([...checkEdArr]);
+    setStyleList([...styleList]);
+  };
+  // 取消
+  const cancelItem  = ()=>{
+    setTabIndex(0)
+    setCheckEdArr([])
+    // styleList 是二维数组
+    styleList.flat(2).forEach((item,index)=>{
+      item.checkEd = false
+    })
+    setStyleList([...styleList])
+    setCallShow(false)
+  }
   useEffect(() => {
     getMjStyle();
     return;
@@ -77,18 +116,27 @@ const App = () => {
           <div className={style.callWord}>
             <div className={style.callWordTitle}>选择提示词</div>
             <div className={style.changebox}>
-              <Tabs defaultActiveKey='1' items={tabs} />
+              <Tabs
+                defaultActiveKey={tabIndex}
+                items={tabs}
+                onChange={changeStyleTab}
+              />
               <div className={style.tabsModalContent}>
-                <div className={style.modalItem}>
-                  <div className={style.left}>
-                    <Checkbox></Checkbox>
+                {styleList[tabIndex].map((item, index) => (
+                  <div className={style.modalItem}>
+                    <div className={style.left}>
+                      <Checkbox
+                        onChange={() => changeCheck(index)}
+                        value={item.label}
+                        checked={item.checkEd}></Checkbox>
+                    </div>
+                    <div className={style.right}>{item.label}</div>
                   </div>
-                  <div className={style.right}>水彩画</div>
-                </div>
+                ))}
               </div>
-            </div>
+            </div>  
             <div className={style.btnBoxBottom}>
-              <div className={style.cancle} onClick={() => setCallShow(false)}>
+              <div className={style.cancle} onClick={cancelItem}>
                 取消
               </div>
               <div className={style.save} onClick={() => setCallShow(false)}>
@@ -136,12 +184,15 @@ const App = () => {
                 border: "1px solid rgba(255, 255, 255, 0.08)",
               }}>
               <div className={style.btnContent}>
-                <div className={style.btnContItem}>
-                  <div>
-                    <img src={Rubbish} alt='' />
-                  </div>
-                  <div className={style.name}>精密插画</div>
-                </div>
+                {checkEdArr[tabIndex] &&
+                  checkEdArr[tabIndex].map((item, index) => (
+                    <div className={style.btnContItem} key={index}>
+                      <div onClick={() => delItem(item, index)}>
+                        <img src={Rubbish} alt='' />
+                      </div>
+                      <div className={style.name}>{item.label}</div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
@@ -205,4 +256,4 @@ const App = () => {
     </ConfigProvider>
   );
 };
-export default App;
+export default forwardRef(App);

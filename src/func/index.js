@@ -5,21 +5,22 @@ import {
 } from "@tauri-apps/api/window";
 import { readDir } from "@tauri-apps/api/fs";
 import { useStore } from "@/store";
-// import { playSound } from '@tauri-apps/api/tauri';
+import { useNavigate } from "react-router-dom";
 /*
- * @ des 播放提示音
+ * @ des 检测用户登录天数
  * */
-// async function playNotificationSound() {
-//   try {
-//     await playSound({
-//       path: '/path/to/sound.wav', // 提示音文件的路径
-//       volume: 0.5, // 音量值介于 0.0 到 1.0 之间
-//     });
-//     console.log('提示音已播放');
-//   } catch (error) {
-//     console.error('播放提示音时出错:', error);
-//   }
-// }
+function checkLoginStatus() {
+  const loginTime = localStorage.getItem("loginTime");
+  if (loginTime) {
+    const currentTime = Date.now();
+    const threeDays = 3 * 24 * 60 * 60 * 1000; // 三天的毫秒数
+    if (currentTime - loginTime > threeDays) {
+      const goPage = useNavigate();
+      localStorage.clear("loginTime");
+      goPage("/", { replace: true });
+    }
+  }
+}
 
 /*
  * @ des 读取文件目录
@@ -44,7 +45,7 @@ async function setWindowSize(width, height) {
  * @desc vite 引用图片
  * */
 function getImageUrl(name) {
-  return new URL(`/src/assets/${name}.png`, import.meta.url).href;
+  return new URL(`/public/assets/${name}.png`, import.meta.url).href;
 }
 /*
  * desc关闭窗口
@@ -83,52 +84,88 @@ function setWindowCenter() {
   appWindow.center();
 }
 /*
-@des 图片本地目录地址
-* */
-function appImagePath(type) {
-  if (type == "origin") {
-    return "/pyExe/userDeatils/images";
-  }
-  if (type == "workfolder") {
-    return "/pyExe/workfolder";
-  }
-}
 
 /*
 @des 一键生图任务队列
-@params  data:Array 数据  
+@params  checkVal:Array 被选中的数据List  
          fn:Promise 接口请求方法  
          breakStatus:打断任务标识
 * */
-function queeTask(data, fn) {
+function queeTask(checkVal, fn) {
   sessionStorage.setItem("breakStatus", "0");
   sessionStorage.setItem("stateData", JSON.stringify({}));
   // 当前任务
   let targetNum = 1;
-  // 任务总数
-  let totalNum = data.length;
-  // 数据id
-  let value = data[targetNum - 1];
+  // 单个草稿任务的总分镜数量
+  let totalNum = undefined;
   // 进度值
   let progress = undefined;
-
+  let draftIndex = 0;
+  // 当前执行的草稿任务
+  let draft = checkVal[draftIndex];
+  // 默认值是选中的第一个草稿任务下的第一个分镜id
+  let value = checkVal.find((item) => checkVal[0].storyboardList[0]).id;
+  // 获取当前任务下的所有分镜id
+  let draft_board_uuid = draft.storyboardList.map((item) => item.id);
   return async function gen(res, rej) {
+    value = draft_board_uuid[targetNum - 1];
+    // 当前执行的草稿任务index
+    draftIndex = checkVal.findIndex(
+      (val) => JSON.stringify(val) == JSON.stringify(draft)
+    );
+    totalNum = draft.storyboardList.length;
     // 判断中止状态
     let breakStatus = sessionStorage.getItem("breakStatus");
     if (Boolean(+breakStatus)) {
       return rej({
         status: "break",
       });
-    } else if (targetNum == totalNum) {
-      // 任务执行完毕
-      return res({
-        status: "done",
+    } else if (targetNum > totalNum) {
+      // 判断当前草稿任务的索引是否是数据的长度    即是否全部执行完毕
+      if (draftIndex == checkVal.length) {
+        console.log("最后");
+        // 任务执行完毕
+        return res({
+          status: "done",
+        });
+      } else {
+        // 如果不是 则 设置数据后开启下一轮草稿任务的队列
+        targetNum = 1;
+        ++draftIndex;
+        if (draftIndex == checkVal.length) {
+          console.log("最后");
+          // 任务执行完毕
+          return res({
+            status: "done",
+          });
+        }
+        draft = checkVal[draftIndex];
+        totalNum = draft.storyboardList.length;
+        console.log(draft, "draft==================");
+        draft_board_uuid = draft.storyboardList.map((item) => item.id);
+        value = draft_board_uuid[targetNum - 1];
+        // 第二轮开始时的默认进度
+        progress = 3;
+        gen(res, rej);
+        return res({
+          status: "ing",
+          progress,
+          draftName: draft.draftName,
+          totalNum,
+          draftIndex,
+        });
+      }
+    } else if (targetNum <= totalNum) {
+      res({
+        status: "ing",
+        targetId: value,
+        draftName: draft.draftName,
+        totalNum,
+        draftIndex,
       });
-    } else if (targetNum < totalNum) {
       await fn(value);
       ++targetNum;
-
-      value = data[targetNum - 1];
+      value = draft_board_uuid[targetNum - 1];
       // 进度
       progress = ((targetNum / totalNum) * 100).toFixed(2);
       console.log(progress, "任务进度");
@@ -136,8 +173,10 @@ function queeTask(data, fn) {
       gen(res, rej);
       return res({
         status: "ing",
-        targetId: value,
         progress,
+        draftName: draft?.draftName,
+        totalNum,
+        draftIndex,
       });
     }
   };
@@ -152,6 +191,6 @@ export {
   setWindowCenter,
   getImageUrl,
   readDirectory,
-  appImagePath,
   queeTask,
+  checkLoginStatus,
 };

@@ -113,7 +113,31 @@ export const reverseWord = (data)=>{
     data
   })
 }
-// 单条数据反推提示词
+// 一键重写
+export const rewritesPost = (data)=>{
+  return request({
+    url:'/sd/rewrites',
+    method:'post',
+    data
+  })
+}
+//单条重写
+export const rewriteAlonePost = (data)=>{
+  return request({
+    url:'/sd/rewrite',
+    method:'post',
+    data
+  })
+}
+// 用户手动编辑重写
+export const manualRewrite = (data)=>{
+  return request({
+    url:'/draftBoard/saveRewriteText',
+    method:'post',
+    data
+  })
+}
+//单条数据反推提示词
 export const reverseAloneWord = (data)=>{
   return request({
     url:'/sd/reverseInferenceOneWord',
@@ -133,7 +157,7 @@ export const savePrompt =(data)=>{
 // 获取全局风格
 export const getGlobalStyle = ()=>{
   return request({
-    url:'/api/getStyle',
+    url:'/sd/getStyle',
     method:'get',
   })
 }
@@ -194,6 +218,14 @@ export const generateAudio = (data) => {
     data,
   });
 };
+// 单个分镜生成音频 
+export const generateAudioOne = (data)=>{
+  return request({
+    url: "/sd/generateSoundOne",
+    method: "post",
+    data,
+  });
+}
 // 插入关键帧
 export const pushVideoFrame = (data)=>{
   return request({
@@ -205,7 +237,7 @@ export const pushVideoFrame = (data)=>{
 // 插入单个关键帧
 export const pushAloneVideoFrame = (data)=>{
   return request({
-    url:'/generateSingleFrame',
+    url:'/api/generateSingleFrame',
     method:'post',
     data
   })
@@ -214,9 +246,57 @@ export const pushAloneVideoFrame = (data)=>{
 // 微信支付(获取二维码)
 export const getWxPayCode = (data)=>{
   return request({
-    url:'https://www.huitangaigc.cn/open/payment/wechat/pay',
-    baseURL:'',
+    url:'/pay',
     method:'post',
     data
+  })
+} 
+// 查询微信订单状态
+export const getWxPayState = (data)=>{
+  return request({
+    url:'/pay/query',
+    method:'post',
+    data
+  })
+} 
+// 获取用户机器码
+export const getSecretKey = (data)=>{
+  return request({
+    url:'/getSecretKey',
+    method:'get',
+  })
+} 
+// 激活
+export const getActivate = (data)=>{
+  return request({
+    url:'/activate',
+    method:'post',
+    data
+  })
+} 
+// 激活状态查询
+export const getActivateState = (data)=>{
+  return request({
+    url:'/verify',
+    method:'get',
+  })
+} 
+
+// 配置
+
+// 保存剪辑草稿目录
+export const setFileCatalog = (data)=>{
+  return request({
+    url:'/config/saveConfig',
+    method:'post',
+    data
+  })
+} 
+
+// 获取剪辑配置
+export const getFileCatalog = (data)=>{
+  return request({
+    url:'/config/getJianYingDraftFolder',
+    method:'get',
   })
 } 

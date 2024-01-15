@@ -2,8 +2,9 @@ import {useEffect, useRef, useState} from "react";
 import {setWindowSize, getImageUrl,setWindowCenter} from "@/func/index.js";
 import {Outlet, useNavigate} from 'react-router-dom'
 import style from './index.module.less'
-import girl from '@/assets/logo.png'
-import logoText from '@/assets/hot.png'
+import ht from '/public/assets/ht.png'
+import logoText from '/public/assets/hot.png'
+import { message } from "tdesign-react";
 
 const App = () => {
     console.log(import.meta.url)
@@ -38,8 +39,16 @@ const App = () => {
         }
     ])
     const ck = (item) => {
+        let userActiveStatus = JSON.parse(sessionStorage.getItem('userActiveStatus'))
+        console.log('seesionStor',userActiveStatus);
         setTabKey(item.id)
-        goPage(item.path)
+        if(userActiveStatus=='0'&&['/index/gpt','/index/home'].includes(item.path)){
+            message.info('激活此产品后开启此功能！')
+            return 
+        }else{
+            goPage(item.path)
+        }
+        
     }
     useEffect(() => {
         setWindowSize(1440, 750)
@@ -49,7 +58,7 @@ const App = () => {
         <div className={style.box}>
             <div className={style.left}>
                 <div className={style.logoBox}>
-                    <img src={girl} alt=""/>
+                    <img src={ht} alt=""/>
                     <img src={logoText} alt=""/>
                 </div>
                 <div className={style.changeRoute}>

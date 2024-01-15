@@ -1,9 +1,11 @@
-import Back from "@/assets/back.png";
-import Hot from "@/assets/hot.png";
-import Book from "@/assets/book.png";
+import Back from "/public/assets/back.png";
+import Hot from "/public/assets/hot.png";
+import Book from "/public/assets/book.png";
 import style from "./index.module.less";
-import ht from "@/assets/ht.png";
+import ht from "/public/assets/ht.png";
+import { useNavigate } from "react-router-dom";
 export default () => {
+  const go = useNavigate()
   return (
     <div className={style.box}>
       <div className={style.back}>
@@ -11,7 +13,7 @@ export default () => {
           src={Back}
           alt=''
           className={style.backImg}
-          onClick={() => history.back(-1)}
+          onClick={() => go('/index/home')}
         />
         <img src={ht} alt='' className={style.ht} />
         <div>
