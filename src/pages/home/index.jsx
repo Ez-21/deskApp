@@ -19,7 +19,7 @@ import {
 } from "@/api/api.js";
 const App = () => {
   // 文件限制
-  const allowedVideoTypes = "video/mp4,video/mpeg,video/quicktime";
+  const allowedVideoTypes = "video/mp4";
   const [show, setShow] = useState(false);
   const [fileShow, setFileShow] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -34,7 +34,7 @@ const App = () => {
   const go = useNavigate();
   // 文件handler
   const fileHander = () => {
-    dialog.open({ multiple: true, accept: allowedVideoTypes }).then((res) => {
+    dialog.open({ multiple: true, filters: [{name:'',extensions:['mp4']}] }).then((res) => {
       if (res) {
         setFileShow(true);
         res.forEach((item, index) => {

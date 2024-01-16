@@ -174,7 +174,7 @@ export default () => {
       data.draftList.forEach((element) => {
         // 关键帧数据
         // element.keyFrameList = JSON.parse(JSON.stringify(keyFramesList));
-        element.checked = false;
+        element.checked = true;
         element.storyboardList.forEach((item) => {
           item.keyFrameStyle = item.keyFrameStyle.toString();
           item.spinning = false;
@@ -271,6 +271,7 @@ export default () => {
   };
   // 单独重新生成音频
   const resetVoice = (record) => {
+    message.info('开始重新配音！')
     let dataObj = {};
     for (let key in voiceSetting) {
       console.log(voiceSetting[key], "???");

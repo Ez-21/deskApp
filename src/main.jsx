@@ -17,16 +17,20 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { checkLoginStatus } from "@/func";
 import "./App.module.less";
 import "tdesign-react/dist/tdesign.css";
+import { appWindow } from "@tauri-apps/api/window";
+import { app, process } from "@tauri-apps/api";
+appWindow.listen("tauri://close-requested", ({ event, payload }) => {
+  console.log({ event, payload }, "关闭窗口事件");
+});
 const App = () => {
   React.useEffect(() => {
     checkLoginStatus();
   }, []);
-  const Route = ()=>useRoutes(routes)
+  const Route = () => useRoutes(routes);
   return (
-    // <React.Suspense fallback={null}>
-      <HashRouter><Route></Route></HashRouter>
-      /* <RouterProvider router={routes}></RouterProvider> */
-    /* </React.Suspense> */
+    <HashRouter>
+      <Route></Route>
+    </HashRouter>
   );
 };
 ReactDOM.createRoot(document.getElementById("root")).render(<App></App>);

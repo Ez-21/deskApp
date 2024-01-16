@@ -5,10 +5,15 @@ import indexLogo from "/public/assets/indexLogo.png";
 import backGround from "/public/assets/loginBack.png";
 import password from "/public/assets/password.png";
 import phone from "/public/assets/phone.png";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { setWindowSize, getImageUrl } from "@/func/index.js";
-import { userWxLogin, userWxState,getActivateState } from "@/api/api.js";
+import {
+  userWxLogin,
+  userWxState,
+  getActivateState,
+  judgeLogin,
+} from "@/api/api.js";
 import { QRCode, message } from "antd";
 import { invoke } from "@tauri-apps/api/tauri";
 const Index = () => {
@@ -17,17 +22,27 @@ const Index = () => {
     status: "loading",
   });
   const GoPage = useNavigate();
-    // 查询激活状态
-    const getActivate = () => {
-      getActivateState().then((res) => {
-        if (res.code==200) {
-          sessionStorage.setItem('userActiveStatus','1')
-        } else {
-          sessionStorage.setItem('userActiveStatus','0')
-          GoPage('/index/mine')
-        }
-      });
-    };
+  // 验证是否需要登录
+  const judgeLoginHandle = () => {
+    judgeLogin().then((res) => {
+      console.log(res, "验证登录的数据");
+      if (res.data) {
+        sessionStorage.setItem("userInfo", JSON.stringify(res.data));
+        GoPage("/index/home", { replace: true });
+      }
+    });
+  };
+  // 查询激活状态
+  const getActivate = () => {
+    getActivateState().then((res) => {
+      if (res.code==200) {
+        sessionStorage.setItem("userActiveStatus", "1");
+      } else {
+        sessionStorage.setItem("userActiveStatus", "0");
+        GoPage("/index/mine");
+      }
+    });
+  };
   const requestWx = () => {
     setQrcode({
       url: "123",
@@ -62,7 +77,9 @@ const Index = () => {
                 // 保存用户登录时间
                 localStorage.setItem("loginTime", Date.now());
                 clearInterval(stateQuery);
-                return GoPage("/index/home", { replace: true });
+                getActivate();
+                GoPage("/index/home", { replace: true });
+                return
               }
               // 二维码失效
               if (res.data.state == 666) {
@@ -80,7 +97,7 @@ const Index = () => {
   };
 
   const login = () => {
-    // 
+    //
     GoPage("/Step3SyncVideo", {
       state: {},
       replace: true,
@@ -89,9 +106,11 @@ const Index = () => {
   const refreshQrcode = () => {
     requestWx();
   };
+  useLayoutEffect(() => {
+    // judgeLoginHandle();
+  }, []);
   useEffect(() => {
     setWindowSize(987, 572);
-    getActivate()
     requestWx();
   }, []);
   return (

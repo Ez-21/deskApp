@@ -28,7 +28,7 @@ fn main() {
 // fn main() {
 //     // 创建一个 Command 对象，指定要运行的可执行文件的路径
 //     // 这里假设 main.exe 在当前目录下，你也可以用绝对路径或相对路径
-//     let output = Command::new("F:\\quick\\pyExe\\main\\main.exe")
+//     let output = Command::new("F:\\quick\\pyExe\\JX\\main\\main.exe")
 //         .output()
 //         .expect("Failed to execute command");
 //     // 执行 Command 对象，返回一个 Result 类型

@@ -27,7 +27,7 @@ const App = () => {
   const [secretKey, setSecretKey] = useState("");
   const [activationCode, setActivationCode] = useState("");
   const [activeState, setActiveState] = useState(undefined);
-  const [userStatus,setUserStatus] = useState('')
+  const [userStatus, setUserStatus] = useState("");
   const [payWay, setPayWay] = useState({
     wx: "",
     zfb: "",
@@ -140,11 +140,11 @@ const App = () => {
       setSecretKey(secretKey);
     });
   };
-  
+
   // 激活
   const activate = () => {
     getActivate({
-      activationCode
+      activationCode,
     })
       .then((res) => {
         console.log(res);
@@ -155,20 +155,20 @@ const App = () => {
         }
       })
       .finally(() => {
-        getActivateHandle()
+        getActivateHandle();
         SetGetModalShow(false);
       });
   };
   // 查询激活状态
   const getActivateHandle = () => {
     getActivateState().then((res) => {
-      console.log(res,'查询状态res');
-      if (res.code == 200) {
-        sessionStorage.setItem('userActiveStatus','1')
+      console.log(res, "查询状态res");
+      if (res.code==200) {
+        sessionStorage.setItem("userActiveStatus", "1");
         setActiveState(true);
       } else {
         setActiveState(false);
-        sessionStorage.setItem('userActiveStatus','0')
+        sessionStorage.setItem("userActiveStatus", "0");
       }
     });
   };
@@ -288,7 +288,9 @@ const App = () => {
             <div className={style.userMsg}>
               <div>
                 {userInfo?.nickname ?? "--"}
-                <div className={style.userStatus} onClick={() =>activeState?null:openGet(true)}>
+                <div
+                  className={style.userStatus}
+                  onClick={() => (activeState ? null : openGet(true))}>
                   {activeState ? "已激活" : "未激活"}
                 </div>
               </div>

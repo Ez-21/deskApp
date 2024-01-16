@@ -4,6 +4,7 @@ import style from "./index.module.less";
 import { Tabs, Collapse, ConfigProvider, Button, message, Spin } from "antd";
 import theme from "./componentTheme";
 import { savePrompt } from "@/api/api";
+import { fetch } from '@tauri-apps/api/http';
 const App = (props) => {
   const [item, setItem] = useState([]);
   const [content, setContent] = useState([]); // * 所有的prompt数据
@@ -46,9 +47,14 @@ const App = (props) => {
 
   const getJson = () => {
     setSpinning(true);
+    const url = new URL('/public/json/promot.json', import.meta.url);
+    console.log(url,'路径');
     return new Promise((resolve) => {
-      fetch("/public/json/promot.json")
-        .then((res) => res.json())
+      fetch(url.href)
+        .then((res) => {
+          console.log(res,'ressss');
+         return res.json()
+        })
         .then((res) => {
           setContent((val) => {
             let content = Object.values(res);

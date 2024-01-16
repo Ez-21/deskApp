@@ -119,16 +119,10 @@ function queeTask(checkVal, fn) {
     if (Boolean(+breakStatus)) {
       return rej({
         status: "break",
-      });
+      });     //判断单条草稿任务是否已经全部结束
     } else if (targetNum > totalNum) {
-      // 判断当前草稿任务的索引是否是数据的长度    即是否全部执行完毕
-      if (draftIndex == checkVal.length) {
-        console.log("最后");
-        // 任务执行完毕
-        return res({
-          status: "done",
-        });
-      } else {
+      // 判断是否全部草稿任务执行完毕
+      if (draftIndex != checkVal.length) {
         // 如果不是 则 设置数据后开启下一轮草稿任务的队列
         targetNum = 1;
         ++draftIndex;

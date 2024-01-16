@@ -1,4 +1,12 @@
 import request from "./axios";
+//验证是否需要登录
+export const judgeLogin = () => {
+  return request({
+    url: "/verifyLogin",
+    method: "post",
+  });
+}
+
 // 微信登录
 export const userWxLogin = () => {
   return request({
@@ -281,9 +289,15 @@ export const getActivateState = (data)=>{
     method:'get',
   })
 } 
+// 退出
+export const exitApp = (data)=>{
+  return request({
+    url:'/exit',
+    method:'post',
+  })
+} 
 
 // 配置
-
 // 保存剪辑草稿目录
 export const setFileCatalog = (data)=>{
   return request({

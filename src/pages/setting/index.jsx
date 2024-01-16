@@ -36,7 +36,7 @@ const App = () => {
     });
   };
   useEffect(()=>{
-    showFileSrc
+    showFileSrc()
   },[])
   return (
     <div className={style.box}>

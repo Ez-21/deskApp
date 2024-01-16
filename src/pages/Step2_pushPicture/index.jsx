@@ -140,7 +140,7 @@ export default () => {
           if (showComp == 1) {
             tableOneRef.current.form = element.modelSetting;
           }
-          element.checked = false;
+          element.checked = true;
           element.storyboardList.forEach((item) => {
             item.spinning = false;
             // 设置原图地址
@@ -241,9 +241,11 @@ export default () => {
     queeTask(checkVal, useCreatePicturePost)(
       (res) => {
         if (res.status == "done") {
-          state.value = false;
-          state.progress = 100;
-          setState({ ...state });
+          setState(res=>{
+            res.progress = 100;
+            res.value = false;
+            return {...res}
+          })
           getDetial();
           return message.success("生图任务执行完毕");
         } 
@@ -728,7 +730,8 @@ export default () => {
               </Image.PreviewGroup>
               <div
                 className={style.wipe}
-                onClick={() => setWipeStatus(!wipeStatus)}
+                // setWipeStatus(!wipeStatus)
+                onClick={() =>{} }
                 style={showComp != 2 ? { top: 0 } : {}}>
                 <img src={Wipe} alt='' />
                 擦除

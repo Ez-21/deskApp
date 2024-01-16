@@ -21,13 +21,13 @@ export default function () {
     let draftIdsArr = draftList.map((item) => item.draftId);
     let val = draftIdsArr[index];
     function quee() {
-      if(index < draftIdsArr.length){
+      if (index < draftIdsArr.length) {
         message.info(`${draftList[index].draftName}开始进行抽帧！`);
       }
       setVideoFraming({ draftIds: [val] }).then((res) => {
         if (res.code == 200) {
           console.log(res.data);
-         let timeInter = setInterval(async () => {
+          let timeInter = setInterval(async () => {
             let status = await getTaskProgress(val);
             if (status) {
               clearInterval(timeInter);
@@ -35,9 +35,11 @@ export default function () {
               ++index;
               val = draftIdsArr[index];
               if (index == draftIdsArr.length) {
-                message.success('抽帧任务已全部执行完成！')
+                message.success("抽帧任务已全部执行完成！");
+                console.log(timeInter,'抽帧任务全部执行完毕------------定时器');
                 clearInterval(timeInter);
                 setTimeTravel(undefined);
+                throw
                 return;
               } else {
                 return quee();
@@ -128,9 +130,9 @@ export default function () {
   useEffect(() => {
     getlist(params.state?.taskId);
     return () => {
-      console.log(timeTravel,'定时器？？');
-        clearInterval(timeTravel)
-        setTimeTravel(undefined);
+      console.log(timeTravel, "定时器？？");
+      clearInterval(timeTravel);
+      setTimeTravel(undefined);
     };
   }, []);
   const checkAll = () => {
@@ -156,11 +158,11 @@ export default function () {
           <div>合成视频</div>
         </div>
         <div style={{ display: "flex", gap: "15px" }}>
-          <div className={style.frame} onClick={createPicture}>
-            一键生图
-          </div>
           <div className={style.frame} onClick={pushPicture}>
             一键抽帧
+          </div>
+          <div className={style.frame} onClick={createPicture}>
+            一键生图
           </div>
         </div>
       </div>
