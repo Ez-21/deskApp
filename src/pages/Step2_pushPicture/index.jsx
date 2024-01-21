@@ -6,6 +6,10 @@ import createDown from "/public/assets/createDown.png";
 import createSet from "/public/assets/createSet.png";
 import Wipe from "/public/assets/wipe.png";
 import theme from "./componentTheme";
+import min from "/public/assets/createMin.png";
+import Ques from "/public/assets/ques.png";
+import { ContainerOutlined } from "@ant-design/icons";
+import { WebviewWindow } from "@tauri-apps/api/window";
 import {
   Tabs,
   Collapse,
@@ -19,6 +23,10 @@ import {
   message,
   Spin,
   Image,
+  Tooltip,
+  FloatButton,
+  Divider,
+  Modal,
 } from "antd";
 // 返回组件
 import BackBar from "@/components/backBar";
@@ -34,7 +42,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 import { getImageUrl, queeTask } from "../../func";
-import { useStore } from "@/store";
+
 // 接口
 import {
   getSdModel,
@@ -43,26 +51,35 @@ import {
   createPicHandle,
   setSdModel,
   reverseWord,
-  // getMjDetial,
+  getMjDetial,
   reverseAloneWord,
   rewriteAlonePost,
   rewritesPost,
   manualRewrite,
+  setMjStyle,
+  changeImgIndex,
 } from "@/api/api.js";
 export default () => {
   const go = useNavigate();
   const { Option } = Select;
   const { Panel } = Collapse;
   const params = useLocation();
+  // 用来存放复现check选中的任务
+  let reCheckIds = [];
+  let breakStatus = JSON.parse(sessionStorage.getItem("breakStatus"));
   // 用户手动重写
   const [userWriteText, setUserWriteText] = useState("");
   // 状态库
   // laoding效果
   const [loading, setLoading] = useState(false);
+  // 设置出图配置中的Sd模型
+  const [options, setOptions] = useState([]);
   // 表格详情
   const [detial, setDetial] = useState([]);
   const [showComp, setShowComp] = useState(1);
   const [picModal, setPicModal] = useState(false);
+  // 出图数量
+  const [photoNum, setPhotoNum] = useState([1, 2, 3, 4]);
   // 擦除组件显示
   const [wipeStatus, setWipeStatus] = useState(false);
   // 提示词显示
@@ -72,6 +89,11 @@ export default () => {
   const [targetData, setTargetData] = useState();
   // 全选
   const [checkAll, setCheckAll] = useState(false);
+  // 用来回显的props数据
+  const [refProps, setRefProps] = useState({
+    oneRef: undefined,
+    twoRef: undefined,
+  });
   // MJ设置表单
   const [mjSetting, setMjSetting] = useState({
     currentIndex: 0,
@@ -81,19 +103,19 @@ export default () => {
     value: false,
     progress: "",
     target: undefined,
-    draftName:'',
+    draftName: "",
     total: "",
     //中断状态
     status: false,
     // 草稿任务个数
-    draftListLength:undefined,
+    draftListLength: undefined,
     // 当前执行的第几个草稿任务
-    draftIndex:undefined,
+    draftIndex: undefined,
   });
   // 出图配置表单
   const [dataModel, setDataModel] = useState({
     // lorald
-    loraId: undefined,
+    loraId: "mmtianzunmm_20230730080231",
     // 模型数组数据
     loraArr: [],
     // 反向提示词
@@ -103,9 +125,15 @@ export default () => {
     // 敏感词
     sensitiveWords: [],
     // 草稿id
-    draftId: undefined,
+    draftId: "",
     // 配置词汇输入
     textVal: "",
+
+    //sd系列数据
+    modelId: undefined, //sd模型值
+    iterationSteps: 20, //迭代步数
+    similarity: 0.75, //相似度
+    plotAmount: 1,
   });
   // 一键生图表单
   const [createPic, setCreatePic] = useState({
@@ -124,25 +152,43 @@ export default () => {
   const tableOneRef = useRef(null);
   const tableTwoRef = useRef(null);
 
-  // 获取SD详情
+  // 获取详情
   const getDetial = () => {
-    // let POSTURL;
-    // if (showComp == 1) {
-    //   POSTURL = getSdDetial;
-    // } else if (showComp == 2) {
-    //   POSTURL = getMjDetial;
-    // }
-    getSdDetial({ draftIds: params.state.draftIds, modelType: showComp }).then(
-      (res) => {
+    let POSTURL;
+    if (showComp == 1) {
+      POSTURL = getSdDetial;
+    } else if (showComp == 2) {
+      POSTURL = getMjDetial;
+    }
+    POSTURL({
+      draftIds: params.state.draftIds,
+      modelType: showComp,
+    })
+      .then((res) => {
         console.log(res.data, "详情数据");
         res.data.draftList.forEach((element) => {
           // 在Sd页面获取 tableOne组件数据
           if (showComp == 1) {
-            tableOneRef.current.form = element.modelSetting;
+            tableOneRef.current.sdForm = element.modelSetting;
+          }
+          // 在Mj页面获取 tableTwo组件数据
+          if (showComp == 2) {
+            for (let key in tableTwoRef.current.mjForm) {
+              tableTwoRef.current.mjForm[key] = res.data[key];
+            }
+            console.log(tableTwoRef.current.mjForm, "复现数据");
+            refProps.twoRef = tableTwoRef.current.mjForm;
+            setRefProps({ ...refProps });
           }
           element.checked = true;
           element.storyboardList.forEach((item) => {
-            item.spinning = false;
+            item.reImagespinning = false;
+            item.rewriteSpinning = false;
+            item.reInferenceSpingning = false;
+            // 如果是mj详情 添加分镜自身的tabs索引
+            if (showComp == 2) {
+              item.currentTabs = [1, 2, 3, 4];
+            }
             // 设置原图地址
             item.orignImagePath = convertFileSrc(item.orignImagePath);
             // 设置仿图图片地址 sd为单张图  mj多张 所以进行数组判断
@@ -169,22 +215,43 @@ export default () => {
             }
           });
         });
-        console.log(res.data.draftList, "数据表格");
+        console.log(res.data, "数据表格");
+        // 用来存放复现check选中的任务
+        if (reCheckIds.length !== 0) {
+          res.data.draftList.forEach((item) => {
+            if (reCheckIds.includes(item.draftId)) {
+              item.checked = true;
+            } else {
+              item.checked = false;
+            }
+          });
+          reCheckIds = [];
+          // setDetial({ ...detial });
+        }
         setDetial(res.data);
-      }
-    );
+      })
+      .finally(() => {});
   };
-  // 获取模型
+  // 获取loora模型
   const getModalArr = async () => {
-    await getSdModel("loras").then((res) => {
-      console.log(res.data.list, "模型");
-      dataModel.loraId = res.data.list[0].value;
-      setDataModel({ ...dataModel });
+    return await getSdModel("loras").then((res) => {
+      // 如果没有数据
+      if (!dataModel.loraId) {
+        dataModel.loraId = res.data.list[0].value;
+      }
       dataModel.loraArr = res.data.list;
       setDataModel({ ...dataModel });
     });
   };
-
+  // 获取SD模型
+  const getModel = () => {
+    getSdModel("sd-models").then((res) => {
+      console.log(res, "sd模型配置");
+      dataModel.modelId = res.data.list[0].value;
+      setDataModel({ ...dataModel });
+      setOptions(res.data.list);
+    });
+  };
   // 切换折叠卡片
   const changeCollapse = (data) => {
     console.log(data, "切换折叠卡片");
@@ -192,27 +259,65 @@ export default () => {
 
   // 点击出图配置开启弹窗
   const picSets = async (e, record) => {
+    console.log(record, "recode");
     e.stopPropagation();
     setPicModal(true);
-    console.log(record, "单例数据");
-    // 这需要判断是否存在  plotConfiguration 进行数据返显
-    dataModel.draftId = record.draftId;
+    // 这需要判断是否存在    进行数据返显
     // 判断该草稿是否保存过出图配置  如果保存过 该plotConfiguration会存在值
     if (Object.values(record.plotConfiguration).length !== 0) {
       for (let key in dataModel) {
-        dataModel[key] = record.plotConfiguration[key];
+        if (record.plotConfiguration[key]) {
+          dataModel[key] = record.plotConfiguration[key];
+        }
+        if (record.modelSetting[key]) {
+          dataModel[key] = record.modelSetting[key];
+        }
       }
-    }
-    // 判断有无配置词
-    if (dataModel.reverseHintWords.length != 0) {
-      dataModel.reverseHintWords = dataModel.reverseHintWords.split(",");
-    }
-    if (dataModel.reverseHintWords.length) {
-      dataModel.sensitiveWords = dataModel.sensitiveWords.split(",");
+      dataModel.draftId = record.draftId;
+      // 判断有无配置词
+      if (dataModel.reverseHintWords.length != 0) {
+        dataModel.reverseHintWords = dataModel.reverseHintWords.split(",");
+      }
+      if (dataModel.reverseHintWords.length) {
+        dataModel.sensitiveWords = dataModel.sensitiveWords.split(",");
+      }
+      if (!dataModel.loraIterationSteps) {
+        dataModel.loraIterationSteps = 20;
+      }
+      if (!dataModel.iterationSteps) {
+        dataModel.iterationSteps = 20;
+      }
+      if (!dataModel.similarity) {
+        dataModel.similarity = 0.75;
+      }
+      if (!dataModel.plotAmount) {
+        dataModel.plotAmount = 1;
+      }
+      console.log(dataModel, "数据======");
     }
     setDataModel({ ...dataModel });
     getModalArr();
   };
+  // 设置滑动
+  const onChangeStep = (newValue) => {
+    dataModel.iterationSteps = newValue;
+    setDataModel({ ...dataModel });
+  };
+  // 设置模型下拉
+  const changeSelect = (newValue) => {
+    dataModel.modelId = newValue;
+    setDataModel({ ...dataModel });
+  };
+  // 设置图生图相似度
+  const onChangeLike = (newValue) => {
+    dataModel.similarity = newValue;
+    setDataModel({ ...dataModel });
+  };
+  const changePlotAmount = (newValue) => {
+    dataModel.plotAmount = newValue;
+    setDataModel({ ...dataModel });
+  };
+
   // 点击一键生图
   const createPicture = () => {
     // 先获取被勾选的数据
@@ -220,41 +325,55 @@ export default () => {
     if (checkVal.length == 0) {
       return message.info("至少选择一条草稿！");
     }
-    message.info('开始进行一键生图！')
+    if (showComp == 1) {
+      let noModelId = checkVal.filter((item) => !item.modelSetting.modelId);
+      if (noModelId.length !== 0) {
+        noModelId.forEach((item) => {
+          message.error(`${item.draftName}下没有配置模型,请手动设置SD模型！`);
+        });
+        return;
+      }
+    }
+    reCheckIds = checkVal.map((item) => item.draftId);
+    message.info("开始进行一键生图！");
     // 提取分镜id // 展平二维数组
     let draft_board_uuid = checkVal
       .map((item) => item.storyboardList.map((item) => item.id))
       .flat(2);
     console.log(draft_board_uuid, "分镜id");
-    // 获取左侧组件数据
-    createPic.model_value = tableOneRef.current.form.modelId;
-    createPic.model_type = showComp;
+    if (showComp == 1) {
+      // 获取左侧组件数据
+      createPic.model_value = tableOneRef.current.sdForm.modelId;
+      createPic.model_type = showComp;
+    }
     // 开启队列遮罩
     state.value = true;
     // state.total = draft_board_uuid.length;
     // 总草稿任务
-    state.draftListLength = checkVal.length
+    state.draftListLength = checkVal.length;
     // 初始化进度
     state.progress = ((1 / draft_board_uuid.length) * 100).toFixed(2);
     setState({ ...state });
     // 开始执行任务队列
     queeTask(checkVal, useCreatePicturePost)(
       (res) => {
+        console.log("执行res回调", res);
+        getDetial();
         if (res.status == "done") {
-          setState(res=>{
+          setState((res) => {
             res.progress = 100;
             res.value = false;
-            return {...res}
-          })
-          getDetial();
+            res.status = "done";
+            return { ...res };
+          });
           return message.success("生图任务执行完毕");
-        } 
+        }
         if (res.status == "ing") {
           return setState((data) => {
             data.progress = res.progress;
-            data.draftName = res.draftName
-            data.total = res.totalNum
-            data.draftIndex = res.draftIndex+1
+            data.draftName = res.draftName;
+            data.total = res.totalNum;
+            data.draftIndex = res.draftIndex + 1;
             return { ...data };
           });
         }
@@ -271,23 +390,29 @@ export default () => {
   };
   // 重新生图
   const regenPicture = async (record) => {
-    record.spinning = true;
+    record.reImagespinning = true;
     setDetial({ ...detial });
-    await useCreatePicturePost(record.id).finally(() => {
+    useCreatePicturePost(record.id).finally(() => {
       getDetial();
     });
   };
   // 重新反推
   const regenText = async (record) => {
-    reverseAloneWord({ paragraphId: record.id }).then((res) => {
-      console.log(res);
-      record.reverseInference = res.data.reverseInferenceWord;
-      setDetial({ ...detial });
-    });
+    record.reInferenceSpingning = true;
+    setDetial({ ...detial });
+    reverseAloneWord({ paragraphId: record.id })
+      .then((res) => {
+        console.log(res);
+        record.reverseInference = res.data.reverseInferenceWord;
+        setDetial({ ...detial });
+      })
+      .finally(() => {
+        getDetial();
+      });
   };
   // 调用一键生图接口
   const useCreatePicturePost = async (value) => {
-    await createPicHandle({
+    return await createPicHandle({
       modelType: showComp,
       storyboardId: value,
     });
@@ -300,41 +425,20 @@ export default () => {
       return;
     }
     let draftIds = checkEdList.map((item) => item.draftId);
-    message.info('开始执行一键反推提示词')
+    reCheckIds = draftIds;
+    message.info("开始执行一键反推提示词");
     setLoading(true);
     reverseWord({
       draftIds,
     })
       .then((res) => {
         if (res.code == 200) {
-          // console.log(res.data.draftList);
-          // let resData = res.data.draftList;
-          // for (let item of detial.draftList) {
-          //   // 获取选中的数据
-          //   if (item.checked) {
-          //     resData.forEach((val) => {
-          //       // 比对草稿Id
-          //       if (item.draftId == val.draftId) {
-          //         for (let listItem of item.storyboardList) {
-          //           // 比对分镜id
-          //           for (let resItem of val.storyboardList) {
-          //             if (listItem.id == resItem.id) {
-          //               listItem.reverseInference =
-          //                 resItem.reverseInferencePromptWords;
-          //             }
-          //           }
-          //         }
-          //       }
-          //     });
-          //   }
-          // }
-          // setDetial({ ...detial });
           message.success("反推提示词执行成功！");
+          getDetial();
         }
       })
       .finally(() => {
         setLoading(false);
-        getDetial()
       });
   };
   // 打开提示词编辑器
@@ -346,11 +450,25 @@ export default () => {
 
   const onChange = (key) => {};
   // 点击历史记录中的图片
-  const ckHistoryImg = (value, record, key, e) => {
+  const ckHistoryImg = (value, record, key, e, index) => {
     e.stopPropagation();
-    console.log(key, "索引");
-    console.log(value, "值");
-    console.log(record, "数据");
+    // console.log(key, "索引");
+    // console.log(value, "值");
+    // console.log(record, "数据");
+    let currentIndex;
+    if (showComp == 1) {
+      currentIndex = 0;
+    } else if (showComp == 2) {
+      currentIndex = "";
+    }
+    changeImgIndex({
+      storyboardId: record.id,
+      currentIndex,
+      currentImageList: record.currentImageList,
+      modelType: showComp,
+    }).then((res) => {
+      console.log(res, "切换仿图索引");
+    });
     detial.draftList.forEach((item, index) => {
       item.storyboardList.forEach((val, key) => {
         if (val.id == record.id) {
@@ -378,6 +496,7 @@ export default () => {
       .map((item) => item.storyboardList)
       .flat(2)
       .every((val) => val.currentImageList.length !== 0);
+
     if (!result) {
       return message.error("存在无仿图的数据，请手动生成对应仿图！");
     }
@@ -391,13 +510,14 @@ export default () => {
   };
   // 上一步
   const goBeforeStep = () => {
-    go("/Step1FrameNumber", { state: params });
+    console.log(params.state, "params.state");
+    go("/Step1FrameNumber", { state: params.state });
   };
   // 切换头部tabs
   const editTabs = (data) => {
+    let num = data;
     setDetial({});
-    setShowComp(data);
-    getDetial();
+    setShowComp(num);
   };
   //切换出图配置词 tabs
   const changeWordTabs = (item) => {
@@ -405,6 +525,7 @@ export default () => {
   };
   // 切换模型
   const changeLora = (e) => {
+    console.log(e);
     dataModel.loraId = e;
     setDataModel({ ...dataModel });
   };
@@ -461,34 +582,72 @@ export default () => {
   };
   // 保存出图配置
   const saveSetting = () => {
-    // 字符串化
+    console.log(dataModel);
     let params = {
       loraId: dataModel.loraId,
       sensitiveWords: dataModel.sensitiveWords.toString(),
       reverseHintWords: dataModel.reverseHintWords.toString(),
       draftId: dataModel.draftId,
       loraIterationSteps: dataModel.loraIterationSteps,
+      modelId: dataModel.modelId, //sd模型值
+      iterationSteps: dataModel.iterationSteps, //迭代步数
+      similarity: dataModel.similarity, //相似度
+      plotAmount: dataModel.plotAmount,
     };
+    console.log(params, "??????");
     setModalOrPricture(params)
       .then((res) => {
         console.log(res);
+        setPicModal(false);
         message.success("保存出图配置成功！");
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        getDetial();
       });
   };
-  // 全局应用
+  // 全局应用Sd配置
   const setPartOrAllModel = (draftIdsVal) => {
-    var allDraftIds = detial.draftList.map((item) => item.draftId);
+    var checkList = detial.draftList.filter((item) => item.checked);
+    if (checkList.length == 0) {
+      message.error("至少选择一条草稿任务！");
+      return;
+    }
+    var allDraftIds = checkList.map((item) => item.draftId);
     setSdModel({
-      modelSetting: { ...tableOneRef.current.form },
+      modelSetting: { ...tableOneRef.current.sdForm },
       // 如果有参数传递进来 代表单独设置   没有参数就调用 代表全局应用
       draftIds: draftIdsVal ?? allDraftIds,
-    }).then((res) => {
-      console.log(res, "保存sdModel");
+    })
+      .then((res) => {
+        console.log(res, "保存sdModel");
+        if (res.code == 200) {
+          message.success("应用成功!");
+        }
+      })
+      .finally(() => {
+        getDetial();
+      });
+  };
+  // 全局应用Mj风格
+  const setMjStyleHandle = () => {
+    let data = { ...tableTwoRef.current.mjForm };
+    // 去除没有数据的属性
+    for (let key in data) {
+      if (data[key] == "") {
+        delete data[key];
+      }
+      if (Array.isArray(data[key]) && data[key].length == 0) {
+        delete data[key];
+      }
+    }
+    // let draftIds = detial.draftList.map(item=>item.draftId);
+    data.draftIds = params.state.draftIds
+    setMjStyle(data).then((res) => {
       if (res.code == 200) {
-        message.success("应用成功!");
+        message.success("MJ风格保存成功！");
       }
     });
   };
@@ -514,6 +673,11 @@ export default () => {
       return { ...res };
     });
   };
+  // 最小化任务弹窗
+  const minHandle = () => {
+    state.value = false;
+    setState({ ...state });
+  };
   // 用户手动重写
   const changeTextArea = (val, record) => {
     // setUserWriteText(record.rewriteText)
@@ -522,10 +686,14 @@ export default () => {
   };
   // 失去焦点
   const blurTextArea = (record) => {
+    console.log(userWriteText);
     // 判断用户是否改动过分镜的重写数据
     if (userWriteText == record.rewriteText) {
       return;
     }
+    // if (!userWriteText) {
+    //   return;
+    // }
     manualRewrite({
       paragraphId: record.id,
       rewriteText: record.rewriteText,
@@ -545,8 +713,10 @@ export default () => {
     if (checkVal.length == 0) {
       return message.info("至少选择一条草稿！");
     } else {
-      message.info('开始执行一键重写！')
+      message.info("开始执行一键重写！");
       let draftIds = checkVal.map((item) => item.draftId);
+      reCheckIds = draftIds;
+      console.log(reCheckIds, "fuxianidssssssssssssssssssssssssss");
       setLoading(true);
       rewritesPost({ draftIds })
         .then((res) => {
@@ -554,16 +724,50 @@ export default () => {
           if (res.code == 200) {
             message.success("已重写草稿分镜！");
           }
-          getDetial();
         })
         .finally(() => {
+          getDetial();
           setLoading(false);
         });
     }
   };
+  // 闭包窗口函数
+  function closureWindow() {
+    const webView = new WebviewWindow("theUniqueLabel", {
+      url: "http://lama.fyshark.com/",
+      alwaysOnTop: true,
+    });
+    // 在 WebView 加载完成后执行的回调函数
+    webView.once("tauri://webview-loaded", () => {
+      console.log("WebView 加载完成");
+      webView.show();
+    });
 
+    // 在 WebView 关闭时执行的回调函数
+    webView.once("tauri://webview-closed", () => {
+      console.log("WebView 已关闭");
+    });
+
+    // 在 WebView 发生错误时执行的回调函数
+    webView.once("tauri://webview-error", (event) => {
+      console.error("WebView 错误:", event.payload);
+    });
+    return () => {
+      webView;
+    };
+  }
+  //擦除
+  const WipeHandle = async (record) => {
+    // const webview = new WebviewWindow("theUniqueLabel", {
+    //   url: "http://lama.fyshark.com/",
+    // });
+    // setWipeStatus(!wipeStatus);
+    closureWindow()();
+  };
   //单独重写
   const againRewirtes = (record) => {
+    record.rewriteSpinning = true;
+    setDetial({ ...detial });
     rewriteAlonePost({
       paragraphId: record.id,
     }).then((res) => {
@@ -577,15 +781,21 @@ export default () => {
       label: "Stable Diffusion",
       key: "1",
     },
-    // {
-    //   label: "Midjourney",
-    //   key: "2",
-    // },
+    {
+      label: "Midjourney",
+      key: "2",
+    },
     // {
     //   label: "Dalle3",
     //   key: "3",
     // },
   ]);
+
+  // 切换分镜上的tabs
+  const changeCrtTabs = (record, index) => {
+    record.currentIndex = index;
+    setDetial({ ...detial });
+  };
   // table表头
   const columns = [
     {
@@ -593,7 +803,7 @@ export default () => {
       title: "编号",
       dataIndex: "index",
       align: "center",
-      width: 80,
+      width: 60,
       render: (text, record, index) => (
         <div className={style.codeNumer}>
           <div>{index + 1}</div>
@@ -638,27 +848,31 @@ export default () => {
       width: 180,
       render: (val, record) => {
         return (
-          <div className={style.TableBox}>
-            <textarea
-              value={val}
-              onChange={(e) => changeTextArea(e.target.value, record)}
-              onFocus={() => setUserWriteText(val)}
-              onBlur={() => blurTextArea(record)}
-              style={{
-                maxHeightheight: "95%",
-                overflowY: "scroll",
-              }}></textarea>
-            <div className={style.handleBottom}>
-              <div
-                style={{
-                  width: "100%",
-                  backdropFilter: "blur(5px)",
-                }}
-                onClick={() => againRewirtes(record)}>
-                重新重写
+          <Spin spinning={record.rewriteSpinning}>
+            <div className={style.TableBox}>
+              <Tooltip title='可以手动输入进行自定义重写'>
+                <textarea
+                  value={val}
+                  onChange={(e) => changeTextArea(e.target.value, record)}
+                  onFocus={() => setUserWriteText(val)}
+                  onBlur={() => blurTextArea(record)}
+                  style={{
+                    maxHeightheight: "95%",
+                    overflowY: "scroll",
+                  }}></textarea>
+              </Tooltip>
+              <div className={style.handleBottom}>
+                <div
+                  style={{
+                    width: "100%",
+                    backdropFilter: "blur(5px)",
+                  }}
+                  onClick={() => againRewirtes(record)}>
+                  重新重写
+                </div>
               </div>
             </div>
-          </div>
+          </Spin>
         );
       },
     },
@@ -670,16 +884,23 @@ export default () => {
       width: 180,
       render: (val, record) => {
         return (
-          <a title='点击打开反推词编辑器'>
-            <div
-              className={style.TableBox}
+          <Tooltip title='点击打开提示词编辑器'>
+            <Spin
+              spinning={record.reInferenceSpingning}
               style={{
-                overflowY: "scroll",
-              }}
-              onClick={() => push(record)}>
-              {val ?? ""}
-            </div>
-          </a>
+                width: "160px",
+              }}>
+              <div
+                className={style.TableBox}
+                style={{
+                  overflowY: "scroll",
+                  cursor: "pointer",
+                }}
+                onClick={() => push(record)}>
+                {val ?? ""}
+              </div>
+            </Spin>
+          </Tooltip>
         );
       },
     },
@@ -692,34 +913,34 @@ export default () => {
       render: (val, record) => {
         return (
           <div className={style.TableBoxFang}>
-            <Spin spinning={record.spinning}>
-              {val.length != 0 && (
-                <div className={style.indexBox}>
-                  {showComp == 2 && (
-                    <div className={style.topBox}>
-                      {[1, 2, 3, 4].map((item, index) => {
-                        return (
-                          <div
-                            className={style.indexBoxItem}
-                            style={
-                              item === 1
-                                ? {
-                                    background: "rgba(255, 255, 255, 0.2)",
-                                    color: "white",
-                                  }
-                                : undefined
-                            }
-                            key={index}>
-                            {item}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <div className={style.bottomBox}></div>
-                </div>
-              )}
-
+            {
+               showComp == 2 && (
+              <div className={style.indexBox}>
+               
+                  <div className={style.topBox}>
+                    {record.currentTabs.map((item, index) => {
+                      return (
+                        <div
+                          onClick={() => changeCrtTabs(record, index)}
+                          className={style.indexBoxItem}
+                          style={
+                            item === record.currentIndex
+                              ? {
+                                  background: "rgba(255, 255, 255, 0.2)",
+                                  color: "white",
+                                }
+                              : undefined
+                          }
+                          key={index}>
+                          {item}
+                        </div>
+                      );
+                    })}
+                  </div>
+                <div className={style.bottomBox}></div>
+              </div>
+            )}
+            <Spin spinning={record.reImagespinning}>
               <div className={style.black}></div>
               <Image.PreviewGroup>
                 <Image
@@ -731,7 +952,7 @@ export default () => {
               <div
                 className={style.wipe}
                 // setWipeStatus(!wipeStatus)
-                onClick={() =>{} }
+                onClick={() => WipeHandle(record)}
                 style={showComp != 2 ? { top: 0 } : {}}>
                 <img src={Wipe} alt='' />
                 擦除
@@ -760,7 +981,7 @@ export default () => {
                 <div
                   className={style.histItem}
                   key={index}
-                  onClick={(e) => ckHistoryImg(item, record, key, e)}>
+                  onClick={(e) => ckHistoryImg(item, record, key, e, index)}>
                   <img width={160} src={item} />
                 </div>
               ))}
@@ -797,10 +1018,12 @@ export default () => {
             style={{
               width: "332px",
             }}></Progress>
-          <div onClick={(e) => picSets(e, data)}>
-            <img src={createSet} alt='' />
-            出图配置
-          </div>
+          {showComp == 1 && (
+            <div onClick={(e) => picSets(e, data)} className={style.pushImgSet}>
+              <img src={createSet} alt='' />
+              出图配置
+            </div>
+          )}
         </div>
       </div>
     );
@@ -809,19 +1032,27 @@ export default () => {
     //设置此页面任务中中断状态
     sessionStorage.setItem("breakStatus", "0");
     sessionStorage.setItem("stateData", JSON.stringify({}));
+    getModel();
     if (params.state) {
       getDetial();
     }
-  }, []);
+    getDetial();
+  }, [showComp]);
   return (
     <ConfigProvider
       theme={{
         ...theme,
       }}>
+      {/* <Modal open={wipeStatus}>
+        <iframe></iframe>
+      </Modal> */}
       {/* 任务进度遮罩层 */}
       {state.value && (
         <div className={style.mask}>
           <div className={style.maskContent}>
+            <div className={style.createMin}>
+              <img src={min} alt='' onClick={minHandle} />
+            </div>
             <div className={style.progress}>
               <Progress size={90} type='circle' percent={state.progress} />
             </div>
@@ -830,7 +1061,8 @@ export default () => {
             </div>
             <div className={style.progressText}>
               <div>共有{state.draftListLength}个剪辑任务</div>
-                 当前正在执行第{state.draftIndex}个剪辑任务：<u>{state.draftName}</u>
+              当前正在执行第{state.draftIndex}个剪辑任务：
+              <u>{state.draftName}</u>
               <p>一共有{state.total}个分镜任务正在执行</p>
             </div>
             <div className={style.maskBtn} onClick={stopCreate}>
@@ -888,7 +1120,13 @@ export default () => {
                       setPartOrAllModel={setPartOrAllModel}
                     />
                   )}
-                  {showComp == 2 && <TabTwo ref={tableTwoRef} />}
+                  {showComp == 2 && (
+                    <TabTwo
+                      ref={tableTwoRef}
+                      comData={refProps.twoRef}
+                      setMjStyleHandle={setMjStyleHandle}
+                    />
+                  )}
                 </div>
               )}
 
@@ -906,14 +1144,12 @@ export default () => {
                       一键高清
                     </div> */}
                     {/* 应用执行操作时候不能让用户重复进行点击 */}
-                    <div onClick={loading ? null : checkAllHand}>
+                    <div onClick={checkAllHand}>
                       {checkAll ? "取消全选" : "全选"}
                     </div>
-                    <div onClick={loading ? null : rewrite}>一键重写</div>
-                    <div onClick={loading ? null : reverseWordHandle}>
-                      一键反推提示词
-                    </div>
-                    <div onClick={loading ? null : createPicture}>一键生图</div>
+                    <div onClick={rewrite}>一键重写</div>
+                    <div onClick={reverseWordHandle}>一键反推提示词</div>
+                    <div onClick={createPicture}>一键生图</div>
                   </div>
                 </div>
 
@@ -926,94 +1162,199 @@ export default () => {
                     <div className={style.picModal}>
                       <div className={style.title}>出图配置</div>
                       <div className={style.solon}>配置</div>
-                      <div className={style.content}>
-                        <div className={style.contentTop}>
-                          <div>风格LORA</div>
-                          <img src={getImageUrl("pirAdd")} alt='' />
-                        </div>
-                        <div className={style.contentBottom}>
-                          <Select
-                            placeholder='请选择Lora模型'
-                            onChange={changeLora}
-                            style={{ width: "100%" }}
-                            value={dataModel.loraId}>
-                            {dataModel.loraArr &&
-                              dataModel.loraArr.map((item, index) => (
-                                <Option value={item.value} key={index}>
-                                  {item.label}
-                                </Option>
-                              ))}
-                          </Select>
-                        </div>
-                      </div>
-                      <div className={style.content}>
-                        <div className={style.contentTop}>
-                          <div>迭代步数</div>
-                        </div>
-                        <div className={style.contentBottom}>
-                          <div className={style.contentSlider}>
-                            <Slider
-                              defaultValue={20}
-                              min={20}
-                              max={40}
-                              onChange={changeSteps}
-                              value={dataModel.loraIterationSteps}></Slider>
-                            <InputNumber
-                              value={dataModel.loraIterationSteps}
-                              min={20}
-                              max={40}
-                              defaultValue={20}
-                              style={{
-                                margin: "0 16px",
-                              }}
-                              step={0.1}></InputNumber>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={style.content}>
-                        <div className={style.wordContent}>
-                          <Tabs
-                            centered
-                            onChange={changeWordTabs}
-                            items={[
-                              { label: "反向提示词", key: 1 },
-                              { label: "敏感词", key: 2 },
-                            ]}></Tabs>
-
-                          <div className={style.wordBox}>
-                            {wordTabs == 1
-                              ? dataModel.reverseHintWords &&
-                                dataModel.reverseHintWords.map(
-                                  (item, index) => (
-                                    <div className={style.word} key={index}>
-                                      {item}
-                                      <img
-                                        src={getImageUrl("closeWindow")}
-                                        alt=''
-                                        onClick={() => delWord(true, index)}
-                                      />
-                                    </div>
-                                  )
-                                )
-                              : dataModel.sensitiveWords &&
-                                dataModel.sensitiveWords.map((item, index) => (
-                                  <div className={style.word} key={index}>
-                                    {item}
-                                    <img
-                                      src={getImageUrl("closeWindow")}
-                                      alt=''
-                                    />
-                                  </div>
+                      <div className={style.settingBox}>
+                        <div className={style.picSdBox}>
+                          <div className={style.content}>
+                            <div className={style.contentTop}>
+                              <div>SD 模型</div>
+                              <img src={getImageUrl("pirAdd")} alt='' />
+                            </div>
+                            <div className={style.contentBottom}>
+                              <Select
+                                size={"middle"}
+                                value={dataModel.modelId}
+                                placeholder={"请选择"}
+                                onChange={changeSelect}
+                                style={{
+                                  width: "100%",
+                                }}>
+                                {options.map((item) => (
+                                  <Option value={item.value} key={item.value}>
+                                    {item.label}
+                                  </Option>
                                 ))}
+                              </Select>
+                            </div>
                           </div>
-                          <div className={style.inpVal}>
-                            <input
-                              type='text'
-                              placeholder='请输入'
-                              value={dataModel.textVal}
-                              onChange={(e) => inputWord(e.target.value)}
-                            />
-                            <div onClick={saveWord}>保存</div>
+                          <div className={style.content}>
+                            <div className={style.contentTop}>
+                              <div>SD 迭代步数</div>
+                            </div>
+                            <div className={style.contentBottom}>
+                              <div className={style.contentSlider}>
+                                <Slider
+                                  defaultValue={20}
+                                  min={20}
+                                  max={40}
+                                  onChange={onChangeStep}
+                                  value={dataModel.iterationSteps}></Slider>
+                                <InputNumber
+                                  value={dataModel.iterationSteps}
+                                  min={20}
+                                  max={40}
+                                  defaultValue={20}
+                                  style={{
+                                    margin: "0 16px",
+                                  }}
+                                  step={0.1}></InputNumber>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={style.content}>
+                            <div className={style.contentTop}>
+                              <div>SD 图生图 相似度</div>
+                            </div>
+                            <div className={style.contentBottom}>
+                              <div className={style.contentSlider}>
+                                <Slider
+                                  step={0.01}
+                                  min={0}
+                                  max={1}
+                                  onChange={onChangeLike}
+                                  value={dataModel.similarity}></Slider>
+                                <InputNumber
+                                  value={dataModel.similarity}
+                                  min={0}
+                                  max={1}
+                                  style={{
+                                    margin: "0 16px",
+                                  }}
+                                  onChange={onChangeLike}
+                                  step={0.1}></InputNumber>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={style.content}>
+                            <div className={style.contentTop}>
+                              <div>SD 出图数量</div>
+                              <img src={getImageUrl("pirAdd")} alt='' />
+                            </div>
+                            <div className={style.contentBottom}>
+                              <Select
+                                size={"middle"}
+                                value={dataModel.plotAmount}
+                                placeholder={"请选择"}
+                                onChange={changePlotAmount}
+                                style={{
+                                  width: "100%",
+                                }}>
+                                {photoNum.map((item) => (
+                                  <Option value={item} key={item}>
+                                    {item}
+                                  </Option>
+                                ))}
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                        <Divider dashed></Divider>
+                        <div className={style.picLoraBox}>
+                          <div className={style.content}>
+                            <div className={style.contentTop}>
+                              <div>LORA 风格</div>
+                              <img src={getImageUrl("pirAdd")} alt='' />
+                            </div>
+                            <div className={style.contentBottom}>
+                              <Select
+                                placeholder='请选择Lora风格'
+                                onChange={changeLora}
+                                style={{ width: "100%" }}
+                                defaultValue={dataModel.loraId}
+                                value={dataModel.loraId}>
+                                {dataModel.loraArr &&
+                                  dataModel.loraArr.map((item, index) => (
+                                    <Option value={item.value} key={index}>
+                                      {item.label}
+                                    </Option>
+                                  ))}
+                              </Select>
+                            </div>
+                          </div>
+                          <div className={style.content}>
+                            <div className={style.contentTop}>
+                              <div>LORA 迭代步数</div>
+                            </div>
+                            <div className={style.contentBottom}>
+                              <div className={style.contentSlider}>
+                                <Slider
+                                  defaultValue={20}
+                                  min={20}
+                                  max={40}
+                                  onChange={changeSteps}
+                                  value={dataModel.loraIterationSteps}></Slider>
+                                <InputNumber
+                                  value={dataModel.loraIterationSteps}
+                                  min={20}
+                                  max={40}
+                                  defaultValue={20}
+                                  style={{
+                                    margin: "0 16px",
+                                  }}
+                                  step={0.1}></InputNumber>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={style.content}>
+                            <div className={style.wordContent}>
+                              <Tabs
+                                centered
+                                onChange={changeWordTabs}
+                                items={[
+                                  { label: "反向提示词", key: 1 },
+                                  { label: "敏感词", key: 2 },
+                                ]}></Tabs>
+
+                              <div className={style.wordBox}>
+                                {wordTabs == 1
+                                  ? dataModel.reverseHintWords &&
+                                    dataModel.reverseHintWords.map(
+                                      (item, index) => (
+                                        <div className={style.word} key={index}>
+                                          {item}
+                                          <img
+                                            src={getImageUrl("closeWindow")}
+                                            alt=''
+                                            onClick={() => delWord(true, index)}
+                                          />
+                                        </div>
+                                      )
+                                    )
+                                  : dataModel.sensitiveWords &&
+                                    dataModel.sensitiveWords.map(
+                                      (item, index) => (
+                                        <div className={style.word} key={index}>
+                                          {item}
+                                          <img
+                                            src={getImageUrl("closeWindow")}
+                                            alt=''
+                                            onClick={() =>
+                                              delWord(false, index)
+                                            }
+                                          />
+                                        </div>
+                                      )
+                                    )}
+                              </div>
+                              <div className={style.inpVal}>
+                                <input
+                                  type='text'
+                                  placeholder='请输入'
+                                  value={dataModel.textVal}
+                                  onChange={(e) => inputWord(e.target.value)}
+                                />
+                                <div onClick={saveWord}>保存</div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1023,31 +1364,45 @@ export default () => {
                       </div>
                     </div>
                   )}
-                  <Spin spinning={loading}>
-                    <Collapse
-                      expandIcon={() => null}
-                      showArrow={false}
-                      style={{
-                        color: "white",
-                      }}
-                      onChange={changeCollapse}>
-                      {detial.draftList &&
-                        detial?.draftList.map((item, index) => (
-                          <Panel
-                            key={item.draftId}
-                            header={
-                              <Header data={item} index={index}></Header>
-                            }>
-                            <Table
-                              scroll={{ x: 1000 }}
-                              pagination={false}
-                              rowKey='id'
-                              dataSource={item.storyboardList}
-                              columns={columns}></Table>
-                          </Panel>
-                        ))}
-                    </Collapse>
-                  </Spin>
+                  {state.status != "done" &&
+                    !state.value &&
+                    state.draftListLength &&
+                    !breakStatus && (
+                      <FloatButton
+                        shape='circle'
+                        type='primary'
+                        style={{ right: 54, bottom: 54 }}
+                        icon={<ContainerOutlined />}
+                        badge={{ count: state.total }}
+                        onClick={() => {
+                          state.value = true;
+                          setState({ ...state });
+                        }}
+                      />
+                    )}
+                  {/* <Spin spinning={loading}> */}
+                  <Collapse
+                    expandIcon={() => null}
+                    showArrow={false}
+                    style={{
+                      color: "white",
+                    }}
+                    onChange={changeCollapse}>
+                    {detial.draftList &&
+                      detial?.draftList.map((item, index) => (
+                        <Panel
+                          key={item.draftId}
+                          header={<Header data={item} index={index}></Header>}>
+                          <Table
+                            scroll={{ x: 1000 }}
+                            pagination={false}
+                            rowKey='id'
+                            dataSource={item.storyboardList}
+                            columns={columns}></Table>
+                        </Panel>
+                      ))}
+                  </Collapse>
+                  {/* </Spin> */}
                 </div>
               </div>
             </div>

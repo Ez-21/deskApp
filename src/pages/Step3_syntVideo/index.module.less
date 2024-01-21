@@ -106,6 +106,7 @@
 
         .offten {
           margin: 10px 0;
+
           .offtenItem {
             box-sizing: border-box;
             display: flex;
@@ -116,11 +117,13 @@
             justify-content: space-evenly;
             cursor: pointer;
             margin-bottom: 10px;
-            img{
+
+            img {
               width: 7px;
               height: 7px;
               object-fit: cover;
             }
+
             .itemWord {
               position: relative;
               color: white;
@@ -131,6 +134,7 @@
               text-overflow: ellipsis;
               white-space: nowrap;
             }
+
             // .itemWord:not(:last-child)::after{
             //   position: absolute;
             //   top: 50%;
@@ -236,7 +240,6 @@
         width: 100%;
         background: #131313;
         overflow-y: scroll;
-        overflow-x: scroll;
         box-sizing: border-box;
         max-height: 100vh;
 
@@ -400,16 +403,19 @@
     height: 132px;
   }
 }
-.audioBox{
+
+.audioBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   color: white;
-  :last-child{
+
+  :last-child {
     margin-top: 15px;
     cursor: pointer;
   }
 }
+
 .selectFrame {
   display: grid;
   place-items: center;
@@ -440,7 +446,8 @@
 
 .TableTextBox {
   z-index: 100;
-  width: 370px;
+  // width: 370px;
+  width:100%;
   height: 160px;
   box-sizing: border-box;
   color: white;
@@ -448,6 +455,16 @@
   border-radius: 2px;
   //overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  textarea {
+    border: none;
+    background: none;
+    color: white;
+    height: 100%;
+    width: 100%;
+    outline: none;
+    padding: 8px;
+    box-sizing: border-box;
+  }
 }
 
 .TableBox {
@@ -569,6 +586,9 @@
           padding: 4px 6px;
           box-sizing: border-box;
           background-color: #2C2C2C;
+          img{
+            cursor: pointer;
+          }
         }
 
         .two {

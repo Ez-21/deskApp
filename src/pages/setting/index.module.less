@@ -5,7 +5,19 @@
   overflow-y: scroll;
   background: url("../../assets/wallpaper.png")round;
 }
-.content{
+
+.linkBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px;
+  div {
+    margin-top: 15px;
+  }
+
+}
+
+.content {
   box-sizing: border-box;
   display: flex;
   justify-content: flex-end;
@@ -16,38 +28,95 @@
     margin-left: 9px;
   }
 }
-.listBox{
+
+.listBox {
   box-sizing: border-box;
   width: 100%;
   padding: 24px;
   color: white;
   background: #070707;
-  .listTitle{
+
+  .listTitle {
     display: flex;
     align-items: center;
     background: rgba(255, 255, 255, 0.02);
     box-sizing: border-box;
-    div{
+
+    div {
       color: white;
       padding: 14.5px 16px;
-      border-bottom:1px solid rgba(255, 255, 255, 0.16);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
 
     }
   }
-  .listConent{
-    .listItem{
+
+  .listConent {
+    .listItemSet {
       margin-top: 16px;
       padding: 16px;
-      display: grid;
-      grid-template-columns:10% 80% 10%;
       background: rgba(255, 255, 255, 0.04);
       font-size: 14px;
       border-radius: 4px;
-      :first-child{
+      color: white !important;
+
+      >div {
+        margin-top: 16px;
+      }
+
+      .listItemSetTip {
+        margin-top: 16px;
+        span {
+          color: #1755FF;
+          cursor: pointer;
+        }
+
+      }
+
+      .likeListItem {
+        display: grid;
+        grid-template-columns: 90% 9%;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 16px;
+        input {
+          padding: 8px;
+          box-sizing: border-box;
+          width: 100%;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 2px;
+          color: rgba(255, 255, 255, 0.85);
+          height: 28px;
+        }
+
+        //place-items: center;
+        .itemBtn {
+          display: grid;
+          place-items: center;
+          padding: 3px 16px;
+          background: #1755FF;
+          border-radius: 2px;
+          font-size: 14px;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .listItem {
+      margin-top: 16px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 10% 80% 10%;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 14px;
+      border-radius: 4px;
+
+      :first-child {
         display: flex;
         align-items: center;
       }
-      input{
+
+      input {
         padding: 8px;
         box-sizing: border-box;
         width: 100%;
@@ -57,8 +126,9 @@
         color: rgba(255, 255, 255, 0.85);
         height: 28px;
       }
+
       //place-items: center;
-      .itemBtn{
+      .itemBtn {
         display: grid;
         place-items: center;
         margin-left: 16px;

@@ -18,13 +18,32 @@ import { checkLoginStatus } from "@/func";
 import "./App.module.less";
 import "tdesign-react/dist/tdesign.css";
 import { appWindow } from "@tauri-apps/api/window";
-import { app, process } from "@tauri-apps/api";
-appWindow.listen("tauri://close-requested", ({ event, payload }) => {
-  console.log({ event, payload }, "关闭窗口事件");
+import { app, process, tauri } from "@tauri-apps/api";
+import { exitApp, exitLogin } from "@/api/api.js";
+import { setWindowIcon } from "@/func";
+appWindow.listen("tauri://close-requested", async (e) => {
+  sessionStorage.clear()
+  await exitLogin().finally(() => {
+    exitApp().finally(() => {
+      appWindow.close();
+    });
+  });
 });
+// 监听文件拖拽上传
+// appWindow.onFileDropEvent((event) => {
+//   if (event.payload.type === "hover") {
+//     console.log("User hovering", event.payload.paths);
+//   } else if (event.payload.type === "drop") {
+//     console.log("User dropped", event.payload.paths);
+//   } else {
+//     console.log("File drop cancelled");
+//   }
+// });
+
 const App = () => {
   React.useEffect(() => {
     checkLoginStatus();
+    setWindowIcon();
   }, []);
   const Route = () => useRoutes(routes);
   return (

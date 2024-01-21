@@ -9,6 +9,9 @@ import ModelSet from "/public/assets/modelSet.png";
 import Ques from "/public/assets/ques.png";
 import theme from "./componentTheme";
 import delOften from "/public/assets/delOften.png";
+import addFrame from "/public/assets/addFrame.png";
+import lessFrame from "/public/assets/lessFrame.png";
+
 import {
   Tabs,
   Switch,
@@ -22,6 +25,7 @@ import {
   InputNumber,
   message,
   Spin,
+  Tooltip,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -44,18 +48,26 @@ import {
   generateAllFrame,
   pushAloneVideoFrame,
   generateAudioOne,
+  manualRewrite,
 } from "@/api/api";
 const { Option } = Select;
 function getImageUrl(name) {
   return new URL(`../../assets/${name}.png`, import.meta.url).href;
 }
+import { getVioceData } from "@/func";
 export default () => {
   const { Panel } = Collapse;
+  // 用来存放复现check选中的任务
+  let reCheckIds = [];
   const go = useNavigate();
   const params = useLocation();
+  const [voiceData, setVoiceData] = useState({});
+
   const [spinging, setSpinging] = useState(false);
   const [showComp, setShowComp] = useState(1);
   const [offtenArr, setOfftenArr] = useState([]);
+  // 用户手动重写
+  const [userWriteText, setUserWriteText] = useState("");
   const [detial, setDetial] = useState();
   const [show, setShow] = useState(false);
   const [paramsData, setParamsData] = useState(params.state);
@@ -103,25 +115,33 @@ export default () => {
     { id: 2, name: "fiona" },
   ]);
   const [voiceSetting, setVoiceSetting] = useState({
-    name: "", //角色，
+    name: "", //配音师，
+    nameData: [], //配音师数组
     pitch: 1, //语调
     rate: 1, //语速
     role: "", //角色
+    roleData: [], //角色数组
     style: "", //风格
+    styleData: [], //风格数组
   });
-  // 点击音色
+  // 点击音色后获取该音色下的角色与风格
   const setVoice = (item, index) => {
+    console.log(item);
     voiceSetting.name = item.name;
+    voiceSetting.roleData = item.roles ?? [];
+    voiceSetting.styleData =
+      voiceSetting.nameData.find((item) => item.name == voiceSetting.name)
+        .styles ?? [];
     setVoiceSetting({ ...voiceSetting });
   };
   // 点击角色
   const setRole = (item, index) => {
-    voiceSetting.role = item.keyword;
+    voiceSetting.role = item.value;
     setVoiceSetting({ ...voiceSetting });
   };
   // 点击风格
   const setStyle = (item, index) => {
-    voiceSetting.style = item.keyword;
+    voiceSetting.style = item.value;
     setVoiceSetting({ ...voiceSetting });
   };
   // 点击语速
@@ -166,46 +186,88 @@ export default () => {
   ));
 
   const doFrame = () => {
+    setCheckFrame([])
     setShow(!show);
   };
 
+  function getVoices() {
+    voiceSetting.nameData = getVioceData();
+    console.log('只洗过了',voiceSetting.nameData);
+    setVoiceSetting({ ...voiceSetting });
+  }
   const getDetial = () => {
-    getVideoDetail(paramsData).then(({ data }) => {
-      data.draftList.forEach((element) => {
-        // 关键帧数据
-        // element.keyFrameList = JSON.parse(JSON.stringify(keyFramesList));
-        element.checked = true;
-        element.storyboardList.forEach((item) => {
-          item.keyFrameStyle = item.keyFrameStyle.toString();
-          item.spinning = false;
-          // item.keyFrameStyleList = [...keyFramesList] //断开引用地址
-          if (item.soundPath) {
-            item.soundPath = convertFileSrc(item.soundPath);
-          }
-          // 设置原图地址
-          item.orignImagePath = convertFileSrc(item.orignImagePath);
-          // 设置仿图图片地址
-          if (item.currentImageList && item.currentImageList.length != 0) {
-            item.currentImage = convertFileSrc(
-              item.currentImageList[item.currentImageIndex ?? 0]
-            );
-          }
-          // 设置历史记录图片地址
-          if (item.historyImageList && item.historyImageList.length != 0) {
-            item.historyImageList.forEach((val, index) => {
-              item.historyImageList[index] = convertFileSrc(
-                item.historyImageList[index]
+    getVideoDetail(paramsData)
+      .then(({ data }) => {
+        data.draftList.forEach((element) => {
+          // 关键帧数据
+          // element.keyFrameList = JSON.parse(JSON.stringify(keyFramesList));
+          element.checked = true;
+          element.storyboardList.forEach((item) => {
+            item.keyFrameStyle = item.keyFrameStyle.toString();
+            item.spinning = false;
+            // item.keyFrameStyleList = [...keyFramesList] //断开引用地址
+            if (item.soundPath) {
+              item.soundPath = convertFileSrc(item.soundPath);
+            }
+            // 设置原图地址
+            item.orignImagePath = convertFileSrc(item.orignImagePath);
+            // 设置仿图图片地址
+            if (item.currentImageList && item.currentImageList.length != 0) {
+              item.currentImage = convertFileSrc(
+                item.currentImageList[item.currentImageIndex ?? 0]
               );
-            });
-          }
+            }
+            // // 设置历史记录图片地址
+            // if (item.historyImageList && item.historyImageList.length != 0) {
+            //   item.historyImageList.forEach((val, index) => {
+            //     item.historyImageList[index] = convertFileSrc(
+            //       item.historyImageList[index]
+            //     );
+            //   });
+            // }
+          });
         });
-      });
-      console.log(data.draftList, "数据-----");
-      setDetial(data.draftList);
-    });
+        console.log(data.draftList, "数据-----");
+        // 用来存放复现check选中的任务
+        if (reCheckIds.length !== 0) {
+          data.draftList.forEach((item) => {
+            if (reCheckIds.includes(item.draftId)) {
+              item.checked = true;
+            } else {
+              item.checked = false;
+            }
+          });
+        }
+        setDetial(data.draftList);
+      })
   };
   const getProgress = async (draftId) => {
     return await getVideoProgress({ draftId });
+  };
+  // 用户手动重写
+  const changeTextArea = (val, record) => {
+    // setUserWriteText(record.rewriteText)
+    record.rewriteText = val;
+    setDetial([...detial]);
+  };
+  // 失去焦点
+  const blurTextArea = (record) => {
+    // 判断用户是否改动过分镜的重写数据
+    if (userWriteText == record.rewriteText) {
+      return;
+    }
+    manualRewrite({
+      paragraphId: record.id,
+      rewriteText: record.rewriteText,
+    })
+      .then((res) => {
+        console.log(res, "用户失去焦点");
+        message.success("已更新重写数据！");
+        setUserWriteText("");
+      })
+      .finally(() => {
+        getDetial();
+      });
   };
   // 生成音频接口
   const createAio = (draftIds) => {
@@ -214,10 +276,12 @@ export default () => {
     // 用户不带的不选择参数
     let dataObj = {};
     for (let key in voiceSetting) {
-      if (voiceSetting[key]) {
+      // 去除数据中的数据数组
+      if (voiceSetting[key] && !Array.isArray(voiceSetting[key])) {
         dataObj[key] = voiceSetting[key];
       }
     }
+
     generateAudio({
       draftIds,
       ...dataObj,
@@ -243,8 +307,11 @@ export default () => {
             localStorage.setItem("offtenVoice", JSON.stringify([voiceSetting]));
           }
           for (let key in voiceSetting) {
-            voiceSetting[key] = "";
+            if(key!=='nameData'){
+              voiceSetting[key] = undefined;
+            } 
           }
+          console.log(voiceSetting,'遍历后的');
           setVoiceSetting({ ...voiceSetting });
           getOfftenVoice();
         }
@@ -267,11 +334,12 @@ export default () => {
       return message.info("请选择一条音色！");
     }
     message.info("开始生成音频！");
+    reCheckIds = draftIds;
     createAio(draftIds);
   };
   // 单独重新生成音频
   const resetVoice = (record) => {
-    message.info('开始重新配音！')
+    message.info("开始重新配音！");
     let dataObj = {};
     for (let key in voiceSetting) {
       console.log(voiceSetting[key], "???");
@@ -301,7 +369,7 @@ export default () => {
     {
       title: "编号",
       dataIndex: "index",
-      width: 80,
+      width: 40,
       // align: "center",
       fixed: "left",
       render: (text, record, index) => (
@@ -312,6 +380,7 @@ export default () => {
     },
     {
       title: "原图",
+      align: "center",
       dataIndex: "orignImagePath",
       fixed: "left",
       width: 180,
@@ -322,9 +391,24 @@ export default () => {
     {
       title: "本镜文案",
       dataIndex: "rewriteText",
-      width: 180,
-      render: (val) => {
-        return <div className={style.TableTextBox}>{val}</div>;
+      width: 190,
+      render: (val, record) => {
+        return (
+          <div className={style.TableTextBox}>
+            <Tooltip title='可以手动输入进行自定义文案'>
+              <textarea
+                resize='none'
+                value={val}
+                onChange={(e) => changeTextArea(e.target.value, record)}
+                onFocus={() => setUserWriteText(val)}
+                onBlur={() => blurTextArea(record)}
+                style={{
+                  maxHeightheight: "95%",
+                  overflowY: "scroll",
+                }}></textarea>
+            </Tooltip>
+          </div>
+        );
       },
     },
 
@@ -332,6 +416,7 @@ export default () => {
       title: "配音",
       dataIndex: "soundPath",
       width: 180,
+      align: "center",
       render: (val, record) => {
         return (
           <div>
@@ -340,9 +425,11 @@ export default () => {
                 <audio
                   controls
                   src={val}
-                  style={{
-                    width: "120px",
-                  }}></audio>
+                  style={
+                    {
+                      width: "140px",
+                    }
+                  }></audio>
                 <div onClick={() => resetVoice(record)}>重新配音</div>
               </div>
             ) : (
@@ -357,6 +444,7 @@ export default () => {
       title: "仿图",
       dataIndex: "currentImage",
       fixed: "left",
+      align: "center",
       width: 180,
       render: (val) => {
         return <img src={val} alt='' className={style.tableImg} />;
@@ -366,6 +454,7 @@ export default () => {
       title: "关键帧",
       dataIndex: "keyFrameStyle",
       width: 180,
+      align: "center",
       render: (val, record) => {
         return (
           <div className={style.selectFrame}>
@@ -429,12 +518,14 @@ export default () => {
       </div>
     );
   };
-  const frameCheck = (index) => {
+  const frameCheck = (item, index) => {
     keyFramesList[index].checked = !keyFramesList[index].checked;
     if (keyFramesList[index].checked) {
-      checkFrame.push(keyFramesList[index]);
-      console.log(checkFrame, " checkFrame数据");
+      checkFrame.push(item);
     } else {
+      let index = checkFrame.findIndex(
+        (val) => JSON.stringify(val) == JSON.stringify(item)
+      );
       checkFrame.splice(index, 1);
     }
     setkeyFramesList([...keyFramesList]);
@@ -452,12 +543,13 @@ export default () => {
       ++index;
       console.log(data, "接口数据");
       if (index == data.length) {
+        console.log(res, "ressssssssssssssssssssssssssss");
         return res({
           status: "done",
           postData,
         });
       } else {
-        return quee();
+        return quee(res, rej);
       }
     }
     return quee;
@@ -470,11 +562,10 @@ export default () => {
       modelType: paramsData.modelType,
     })
       .then((res) => {
-        if (res.code) {
+        if (res.code==200) {
           message.success("合成视频成功！");
         }
         getDetial();
-        console.log(draft_id, "合成视频接口");
       })
       .finally(() => {
         setSpinging(false);
@@ -497,6 +588,7 @@ export default () => {
     }
     message.info("开始进行视频合成！");
     let draftId = checkEdList.map((item) => item.draftId);
+    reCheckIds = draftId;
     queeTask(draftId, createVio)(
       (res) => {
         console.log(res);
@@ -508,7 +600,7 @@ export default () => {
   };
   // 上一步
   const goBeforeStep = () => {
-    // go("/Step1FrameNumber", { state: {} });
+    // go("/Step2PushPicture", { state: params.state });
     history.back(-1);
   };
   // 关闭
@@ -529,6 +621,7 @@ export default () => {
     } else {
       message.info("开始进行关键帧轮询");
       let ids = checkEdList.map((item) => item.draftId);
+      reCheckIds = ids;
       let fn = async (draftId) => {
         return await generateAllFrame({
           draftId,
@@ -562,10 +655,12 @@ export default () => {
       message.success("设置分镜关键帧成功");
     });
   };
+  // 获取常用音色数据
   const getOfftenVoice = () => {
     let strageData = localStorage.getItem("offtenVoice");
     if (strageData) {
       let offtenVoice = JSON.parse(strageData);
+      console.log(styleDub, "?");
       if (offtenVoice) {
         offtenVoice.forEach((item, index) => {
           console.log(item, "item");
@@ -580,6 +675,7 @@ export default () => {
           item.pitchText =
             pitchDub.find((val) => val.value == item.pitch)?.name ?? "--";
         });
+        console.log(offtenVoice, "常用数据");
         setOfftenArr(offtenVoice);
       }
     }
@@ -590,6 +686,7 @@ export default () => {
       voiceSetting[key] = item[key];
     }
     setVoiceSetting({ ...voiceSetting });
+    getVoices()
   };
   // 删除常用音色
   const delOftenHandle = (index, event) => {
@@ -597,8 +694,28 @@ export default () => {
     offtenArr.splice(index, 1);
     localStorage.setItem("offtenVoice", JSON.stringify(offtenArr));
     setOfftenArr([...offtenArr]);
+    getVoices()
   };
+
+  function defaultSpeaker() {
+    return {
+      id: "",
+      category: "",
+      avatar: "",
+      isFree: false,
+      isStar: false,
+      isSupper24K: false,
+      roles: [],
+      styles: [],
+      name: "",
+      displayName: "",
+    };
+  }
   useEffect(() => {
+    // voiceSetting.nameData = getVioceData();
+    // console.log(voiceSetting.nameData, "123456789");
+    // setVoiceSetting({ ...voiceSetting });
+    getVoices();
     getOfftenVoice();
     getDetial();
   }, []);
@@ -622,7 +739,7 @@ export default () => {
             <div className={style.frame} onClick={goBeforeStep}>
               上一步
             </div>
-            <div className={style.frame} onClick={spinging ? null : goNextStep}>
+            <div className={style.frame} onClick={goNextStep}>
               合成视频
             </div>
           </div>
@@ -640,6 +757,7 @@ export default () => {
                     {offtenArr.map((item, index) => {
                       return (
                         <div
+                          key={index}
                           className={style.offtenItem}
                           onClick={() => offtenItemCk(item)}>
                           <a className={style.itemWord} title={item.nameText}>
@@ -669,7 +787,7 @@ export default () => {
                   <div className={style.setItem2}>
                     <div className={style.title}>音色</div>
                     <div className={style.voiceItemContent}>
-                      {voicesDub.map((item, index) => {
+                      {voiceSetting.nameData&&voiceSetting.nameData.map((item, index) => {
                         return (
                           <div
                             onClick={() => setVoice(item, index)}
@@ -678,7 +796,7 @@ export default () => {
                               voiceSetting.name === item.name ? DomStyle : null
                             }
                             className={style.voiceItem}>
-                            {item.LocalName}
+                            {item.displayName}
                           </div>
                         );
                       })}
@@ -686,45 +804,51 @@ export default () => {
                   </div>
                   <div className={style.setItem2}>
                     <div className={style.title}>角色</div>
-                    <div className={style.voiceItemContent}>
-                      {roleDub.map((item, index) => {
-                        return (
-                          <a
-                            title={item.word}
-                            onClick={() => setRole(item, index)}
-                            style={
-                              voiceSetting.role === item.keyword
-                                ? DomStyle
-                                : null
-                            }
-                            key={index}
-                            className={style.voiceItem}>
-                            {item.word}
-                          </a>
-                        );
-                      })}
-                    </div>
+                    {voiceSetting.roleData&&voiceSetting.roleData.length !== 0 &&
+                      voiceSetting.roleData[0].value && (
+                        <div className={style.voiceItemContent}>
+                          {voiceSetting.roleData.map((item, index) => {
+                            return (
+                              <a
+                                title={item.word}
+                                onClick={() => setRole(item, index)}
+                                style={
+                                  voiceSetting.role === item.value
+                                    ? DomStyle
+                                    : null
+                                }
+                                key={index}
+                                className={style.voiceItem}>
+                                {item.label}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
                   </div>
                   <div className={style.setItem2}>
                     <div className={style.title}>风格</div>
-                    <div className={style.voiceItemContent}>
-                      {styleDub.map((item, index) => {
-                        return (
-                          <a
-                            key={index}
-                            title={item.word}
-                            onClick={() => setStyle(item, index)}
-                            style={
-                              voiceSetting.style === item.keyword
-                                ? DomStyle
-                                : null
-                            }
-                            className={style.voiceItem}>
-                            {item.word}
-                          </a>
-                        );
-                      })}
-                    </div>
+                    {voiceSetting.styleData&&voiceSetting.styleData.length != 0 &&
+                      voiceSetting.styleData[0].value && (
+                        <div className={style.voiceItemContent}>
+                          {voiceSetting.styleData.map((item, index) => {
+                            return (
+                              <a
+                                key={index}
+                                title={item.word}
+                                onClick={() => setStyle(item, index)}
+                                style={
+                                  voiceSetting.style === item.value
+                                    ? DomStyle
+                                    : null
+                                }
+                                className={style.voiceItem}>
+                                {item.label}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
                   </div>
                   <div className={style.setItem2}>
                     <div className={style.title}>语速</div>
@@ -778,8 +902,8 @@ export default () => {
                       <img src={ClearTye} alt='' />
                       自动识别音频路径
                     </div> */}
-                    <div onClick={spinging ? null : createAudio}>生成音频</div>
-                    <div onClick={spinging ? null : doFrame}>一键关键帧</div>
+                    <div onClick={createAudio}>生成音频</div>
+                    <div onClick={doFrame}>一键关键帧</div>
                   </div>
                 </div>
                 {show && (
@@ -799,9 +923,15 @@ export default () => {
                           {keyFramesList.map((item, index) => (
                             <div className={style.rightItem} key={item.name}>
                               <div className={style.one}>
-                                <Checkbox
+                                {/* <Checkbox
                                   onChange={() => frameCheck(index)}
-                                  checked={item.checked}></Checkbox>
+                                  checked={item.checked}></Checkbox> */}
+                                {
+                                  <img
+                                    src={item.checked ? lessFrame : addFrame}
+                                    onClick={() => frameCheck(item, index)}
+                                  />
+                                }
                               </div>
                               <div className={style.two}>
                                 <img src={getImageUrl(item.img)} alt='' />
@@ -827,7 +957,7 @@ export default () => {
                   style={{
                     marginTop: "28px",
                   }}>
-                  <Spin spinning={spinging}>
+                  {/* <Spin spinning={spinging}> */}
                     <Collapse
                       expandIcon={() => null}
                       showArrow={false}
@@ -849,7 +979,7 @@ export default () => {
                           </Panel>
                         ))}
                     </Collapse>
-                  </Spin>
+                  {/* </Spin> */}
                 </div>
               </div>
             </div>

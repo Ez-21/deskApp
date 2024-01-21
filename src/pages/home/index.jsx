@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import style from "./index.module.less";
 import Add from "/public/assets/add.png";
 import Delete from "/public/assets/delete.png";
+import checkCircle from "/public/assets/Check-Circle.png";
 import Close from "/public/assets/closeWindow.png";
 import Book from "/public/assets/book.png";
 import { ConfigProvider, message, Spin } from "antd";
@@ -17,6 +18,7 @@ import {
   delteTask,
   getTaskDetial,
 } from "@/api/api.js";
+
 const App = () => {
   // 文件限制
   const allowedVideoTypes = "video/mp4";
@@ -24,6 +26,7 @@ const App = () => {
   const [fileShow, setFileShow] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [targetTask, setTargetTask] = useState();
+  const [tipShow, setTipShow] = useState(false);
   // 任务列表
   const [taskList, setTaskList] = useState([]);
   //表单
@@ -34,21 +37,23 @@ const App = () => {
   const go = useNavigate();
   // 文件handler
   const fileHander = () => {
-    dialog.open({ multiple: true, filters: [{name:'',extensions:['mp4']}] }).then((res) => {
-      if (res) {
-        setFileShow(true);
-        res.forEach((item, index) => {
-          res[index] = {
-            src: item,
-            checked: true,
-          };
-        });
-        setFormData({
-          ...formData,
-          videoPathList: res,
-        });
-      }
-    });
+    dialog
+      .open({ multiple: true, filters: [{ name: "", extensions: ["mp4"] }] })
+      .then((res) => {
+        if (res) {
+          setFileShow(true);
+          res.forEach((item, index) => {
+            res[index] = {
+              src: item,
+              checked: true,
+            };
+          });
+          setFormData({
+            ...formData,
+            videoPathList: res,
+          });
+        }
+      });
   };
   // 获取列表
   const getDataList = () => {
@@ -98,6 +103,10 @@ const App = () => {
       setFileShow(false);
     }
   };
+  // 点击马上配置
+  const setcloudModal = () => {
+    go("/index/setting", { state: {} });
+  };
   // 点击check
   const checkedHander = (item) => {
     formData.videoPathList.forEach((val) => {
@@ -139,8 +148,20 @@ const App = () => {
         console.log(err);
       });
   };
+  // 获取联网状态
+  const getInterNet = () => {
+    if (window.navigator.onLine) {
+      setTipShow(false);
+    } else {
+      setTipShow(true);
+    }
+  };
   useEffect(() => {
     getDataList();
+    getInterNet();
+    window.addEventListener("offline", () => {
+      console.log("断网了");
+    });
   }, []);
   return (
     <ConfigProvider
@@ -151,114 +172,130 @@ const App = () => {
           },
         },
       }}>
-        <div className={style.box}>
-          <div className={style.readContent}>
-            <img src={Book} alt='' />
-            <div>教程</div>
-          </div>
-          <Modal
-            title={"提示"}
-            okText={"删除"}
-            onOk={modalDel}
-            onCancel={modalCel}
-            cancelText={"取消"}
-            open={show}>
-            <p>是否要删除该任务？</p>
-          </Modal>
-          {fileShow && (
-            <div className={style.creatModalBox}>
-              <div className={style.createTaskBox}>
-                <div className={style.taskBoxTitle}>
-                  <div>创建反推任务</div>
-                  <img src={Close} onClick={() => fileHandle(false)} alt='' />
+      <div className={style.box}>
+        <div className={style.readContent}>
+          <img src={Book} alt='' />
+          <div>教程</div>
+        </div>
+        <Modal
+          title={"提示"}
+          okText={"删除"}
+          onOk={modalDel}
+          onCancel={modalCel}
+          cancelText={"取消"}
+          open={show}>
+          <p>是否要删除该任务？</p>
+        </Modal>
+        {fileShow && (
+          <div className={style.creatModalBox}>
+            <div className={style.createTaskBox}>
+              <div className={style.taskBoxTitle}>
+                <div>创建反推任务</div>
+                <img src={Close} onClick={() => fileHandle(false)} alt='' />
+              </div>
+              <div className={style.changeName}>
+                任务名称：
+                <input
+                  type='text'
+                  value={formData?.taskName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, taskName: e.target.value })
+                  }
+                />
+              </div>
+              <div className={style.fileListTitle}>
+                <div>创建反推视频</div>
+                <div>
+                  <div>没有视频？</div>
+                  <div className={style.setPath}>配置草稿路径</div>
                 </div>
-                <div className={style.changeName}>
-                  任务名称：
-                  <input
-                    type='text'
-                    value={formData?.taskName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, taskName: e.target.value })
-                    }
-                  />
-                </div>
-                <div className={style.fileListTitle}>
-                  <div>创建反推视频</div>
-                  <div>
-                    <div>没有视频？</div>
-                    <div className={style.setPath}>配置草稿路径</div>
-                  </div>
-                </div>
+              </div>
 
-                <div className={style.fileList}>
-                  <div className={style.fileItem}>
-                    {formData?.videoPathList.map((item) => {
-                      return (
-                        <div className={style.fileBox} key={item.src}>
-                          <Checkbox
-                            checked={item.checked}
-                            onChange={(e) => checkedHander(item)}></Checkbox>
-                          <div>{item.src.split("\\").at(-1)}</div>
-                        </div>
-                      );
-                    })}
+              <div className={style.fileList}>
+                <div className={style.fileItem}>
+                  {formData?.videoPathList.map((item) => {
+                    return (
+                      <div className={style.fileBox} key={item.src}>
+                        <Checkbox
+                          checked={item.checked}
+                          onChange={(e) => checkedHander(item)}></Checkbox>
+                        <div>{item.src.split("\\").at(-1)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className={style.footer}>
+                <div>
+                  <div
+                    className={style.cancel}
+                    onClick={() => fileHandle(false)}>
+                    取消
+                  </div>
+                  <div className={style.create} onClick={createTaskHandle}>
+                    创建
                   </div>
                 </div>
-                <div className={style.footer}>
-                  <div>
-                    <div
-                      className={style.cancel}
-                      onClick={() => fileHandle(false)}>
-                      取消
-                    </div>
-                    <div className={style.create} onClick={createTaskHandle}>
-                      创建
-                    </div>
-                  </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className={style.content}>
+          {tipShow && (
+            <div className={style.TipWindow}>
+              <img src={checkCircle} alt='' onClick={() => setTipShow(false)} />
+              <div>
+                <div className={style.tipOne}>未连接到云端SD服务</div>
+                <div className={style.tipTwo}>
+                  请联网，以便于使用云端 SD 服务，或者你可以通过在配置中部署本地
+                  SD 服务
                 </div>
+              </div>
+              <div className={style.tipBtn} onClick={setcloudModal}>
+                马上配置
               </div>
             </div>
           )}
-          <div className={style.content}>
-            <div className={style.title}>
-              我的草稿
-              <div className={style.circle}>{taskList.length}</div>
+
+          <div className={style.title}>
+            我的草稿
+            <div className={style.circle}>{taskList.length}</div>
+          </div>
+          <div className={style.listBox}>
+            <div className={style.createBox} onClick={fileHander}>
+              <img src={Add} alt='' />
+              <div>创建任务</div>
             </div>
-            <div className={style.listBox}>
-              <div className={style.createBox} onClick={fileHander}>
-                <img src={Add} alt='' />
-                <div>创建任务</div>
-              </div>
-              {[
-                taskList.map((item, index) => (
-                  <div
-                    className={style.taskBox}
-                    key={index}
-                    onClick={(e) => getDetial(item)}>
-                    <div className={style.titleBox}>
-                      <div>{item.taskName}</div>
-                      <img
-                        src={Delete}
-                        alt=''
-                        onClick={(e) => deleteTask(item, e)}
-                      />
-                    </div>
-                    <div className={style.createTime}>
-                      创建时间：{item.createTime}
-                    </div>
-                    <div>
-                      <Progress
-                        strokeLinecap={"round"}
-                        percent={item.progress ?? 0}
-                        size={"small"}
-                        strokeColor={"#49AA19"}></Progress>
-                    </div>
+            {[
+              taskList.map((item, index) => (
+                <div
+                  className={style.taskBox}
+                  key={index}
+                  onClick={(e) => getDetial(item)}>
+                  <div className={style.titleBox}>
+                    <div>{item.taskName}</div>
+                    <img
+                      src={Delete}
+                      alt=''
+                      onClick={(e) => deleteTask(item, e)}
+                    />
                   </div>
-                )),
-              ]}
-            </div>
+                  <div className={style.createTime}>
+                    创建时间：{item.createTime}
+                  </div>
+                  <div>
+                    <Progress
+                      strokeLinecap={"round"}
+                      percent={item.progress ?? 0}
+                      size={"small"}
+                      strokeColor={"#49AA19"}></Progress>
+                  </div>
+                </div>
+              )),
+            ]}
           </div>
         </div>
+      </div>
     </ConfigProvider>
   );
 };

@@ -4,34 +4,63 @@ import ModelSet from "/public/assets/modelSet.png";
 import Rubbish from "/public/assets/rubbish.png";
 import Ques from "/public/assets/ques.png";
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
-import { Select, Tabs, Checkbox, InputNumber } from "antd";
+import { Select, Tabs, Checkbox, InputNumber, Button } from "antd";
 import { ConfigProvider } from "antd";
 import theme from "./componentTheme";
 import { getGlobalStyle } from "@/api/api.js";
 const App = (props, ref) => {
-  useImperativeHandle(ref, () => {
-    return {};
-  });
   const [callShow, setCallShow] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
   const [viewIndex, setViewIndex] = useState(0);
   const [checkEdArr, setCheckEdArr] = useState([]);
-  const modal = [
-    { value: "1", label: "1:1" },
-    { value: "2", label: "3:2" },
-    { value: "3", label: "5:4" },
-    { value: "4", label: "7:4" },
-    { value: "custom", label: "自定义" },
+  const [sizeDisable, setSizeDisable] = useState(true);
+  const size = [
+    { value: "--ar 1:1", label: "1:1" },
+    { value: "--ar 3:2", label: "3:2" },
+    { value: "--ar 5:4", label: "5:4" },
+    { value: "--ar 7:4 ", label: "7:4" },
+    { value: "自定义", label: "" },
   ];
   const [styleList, setStyleList] = useState([]);
-  const [modalVal, setModalVal] = useState(modal);
+  const [sizeList, setSizeList] = useState(size);
   const [checkItem, setCheckItem] = useState([]);
   const [tabs, setTabs] = useState([]);
+  const [modelList, setmodelList] = useState([
+    { label: "V1", value: "--v 1" },
+    { label: "V2", value: "--v 2" },
+    { label: "V3", value: "--v 3" },
+    { label: "V4", value: "--v 4" },
+    { label: "V5", value: "--v 5" },
+  ]);
+  // mj配置表单
+  const [mjForm, setMjForm] = useState({
+    draftIds: "",
+    midjourneyGlobalStyle: [],
+    midjourneyImageSize: "",
+    height: "",
+    width: "",
+    midjourneyModel: "",
+    currentImageIndex: "",
+  });
+  useImperativeHandle(ref, () => {
+    return {
+      mjForm,
+    };
+  });
+  useEffect(() => {
+    if (props.comData) {
+      for (let key in props.comData) {
+        mjForm[key] = props.comData[key];
+      }
+    }
+  }, []);
   const changeTab = (index) => {
     setTabIndex(index);
   };
   const viewChange = (val) => {
     setViewIndex(val);
+    mjForm.currentImageIndex = val;
+    setMjForm({ ...mjForm });
   };
   // 获取全局风格
   const getMjStyle = () => {
@@ -49,6 +78,7 @@ const App = (props, ref) => {
         label: item.type,
         key: index,
       }));
+      console.log(typeList, "类型");
       setTabs(typeList);
     });
   };
@@ -69,7 +99,7 @@ const App = (props, ref) => {
       console.log(valItem, "勾选的");
       checkEdArr[tabIndex].forEach((item, index) => {
         if (valItem.value == item.value) {
-          checkEdArr[tabIndex].splice(index,1)
+          checkEdArr[tabIndex].splice(index, 1);
         }
       });
     }
@@ -87,24 +117,73 @@ const App = (props, ref) => {
     setCheckEdArr([...checkEdArr]);
     setStyleList([...styleList]);
   };
+  // 选择模型
+  const changeModel = (e) => {
+    console.log(e);
+    mjForm.midjourneyModel = e;
+    setMjForm({ ...mjForm });
+  };
+  // 选择尺寸
+  const changeSize = (e) => {
+    console.log(e);
+    if (e == "自定义") {
+      setSizeDisable(false);
+      mjForm.midjourneyImageSize = e;
+    } else {
+      setSizeDisable(true);
+      mjForm.midjourneyImageSize = e;
+      mjForm.width = "";
+      mjForm.height = "";
+    }
+    setMjForm({ ...mjForm });
+  };
   // 取消
-  const cancelItem  = ()=>{
-    setTabIndex(0)
-    setCheckEdArr([])
+  const cancelItem = () => {
+    setTabIndex(0);
+    setCheckEdArr([]);
     // styleList 是二维数组
-    styleList.flat(2).forEach((item,index)=>{
-      item.checkEd = false
-    })
-    setStyleList([...styleList])
-    setCallShow(false)
-  }
+    styleList.flat(2).forEach((item, index) => {
+      item.checkEd = false;
+    });
+    setStyleList([...styleList]);
+    setCallShow(false);
+  };
+  // 改变宽度
+  const changeWidth = (e) => {
+    console.log(e);
+    mjForm.width = e;
+    setMjForm({ ...mjForm });
+  };
+  // 改变高度
+  const changeHeight = (e) => {
+    console.log(e);
+    mjForm.height = e;
+    setMjForm({ ...mjForm });
+  };
+  //
+  const setStyle = () => {
+    // 设置风格 数据格式
+    checkEdArr.forEach((item, index) => {
+      if (item) {
+        mjForm.midjourneyGlobalStyle.push({
+          type: tabs[index].label,
+          list: item,
+        });
+      }
+    });
+    // 判断是否设置了自定义宽高
+    console.log(mjForm, "已选中的的");
+    if (mjForm.width || mjForm.height) {
+      mjForm.midjourneyImageSize = `--v ${mjForm.width}${
+        mjForm.width && mjForm.height ? ":" : ""
+      }${mjForm.height ?? ""}`;
+    }
+    console.log(mjForm, "提交表单");
+    props.setMjStyleHandle();
+  };
   useEffect(() => {
     getMjStyle();
-    return;
-    if (callShow) {
-      getMjStyle();
-    }
-  }, [callShow]);
+  }, []);
   return (
     <ConfigProvider
       theme={{
@@ -119,22 +198,23 @@ const App = (props, ref) => {
               <Tabs
                 defaultActiveKey={tabIndex}
                 items={tabs}
+                key={Math.random(0, 10)}
                 onChange={changeStyleTab}
               />
-              <div className={style.tabsModalContent}>
-                {styleList[tabIndex].map((item, index) => (
-                  <div className={style.modalItem}>
-                    <div className={style.left}>
-                      <Checkbox
-                        onChange={() => changeCheck(index)}
-                        value={item.label}
-                        checked={item.checkEd}></Checkbox>
-                    </div>
-                    <div className={style.right}>{item.label}</div>
+            </div>
+            <div className={style.tabsModalContent}>
+              {styleList[tabIndex].map((item, index) => (
+                <div className={style.modalItem}>
+                  <div className={style.left}>
+                    <Checkbox
+                      onChange={() => changeCheck(index)}
+                      value={item.label}
+                      checked={item.checkEd}></Checkbox>
                   </div>
-                ))}
-              </div>
-            </div>  
+                  <div className={style.right}>{item.label}</div>
+                </div>
+              ))}
+            </div>
             <div className={style.btnBoxBottom}>
               <div className={style.cancle} onClick={cancelItem}>
                 取消
@@ -180,7 +260,9 @@ const App = (props, ref) => {
             </div>
             <div
               style={{
-                minHeight: "232px",
+                // maxHeight: "232px",
+                height: "160px",
+                overflow: "scroll",
                 border: "1px solid rgba(255, 255, 255, 0.08)",
               }}>
               <div className={style.btnContent}>
@@ -204,7 +286,23 @@ const App = (props, ref) => {
               <img src={Ques} alt='' />
             </div>
             <div className={style.select}>
-              <Select options={modal} value={modalVal}></Select>
+              <div className={style.selectLable}>
+                {sizeList.find(
+                  (item) => mjForm.midjourneyImageSize == item.value
+                )?.label || ""}
+              </div>
+              <Select
+                style={{
+                  width: "90px",
+                }}
+                onChange={changeSize}
+                value={mjForm.midjourneyImageSize}>
+                {sizeList.map((item) => (
+                  <Select.Option key={item.value} value={item.value}>
+                    {item.value}
+                  </Select.Option>
+                ))}
+              </Select>
             </div>
           </div>
           <div className={style.two}>
@@ -213,11 +311,21 @@ const App = (props, ref) => {
                 marginRight: "16px",
               }}>
               <span>宽度</span>
-              <input type='text' />
+              <InputNumber
+                disabled={sizeDisable}
+                type='text'
+                value={mjForm.width}
+                onChange={changeWidth}
+              />
             </div>
             <div>
               <span>高度</span>
-              <input type='text' />
+              <InputNumber
+                disabled={sizeDisable}
+                type='text'
+                value={mjForm.height}
+                onChange={changeHeight}
+              />
             </div>
           </div>
         </div>
@@ -227,7 +335,10 @@ const App = (props, ref) => {
             <img src={Ques} alt='' />
           </div>
           <div className={style.select}>
-            <Select options={modal} value={modalVal}></Select>
+            <Select
+              options={modelList}
+              onChange={changeModel}
+              value={mjForm.midjourneyModel}></Select>
           </div>
         </div>
         <div className={style.viewDefault}>
@@ -251,6 +362,11 @@ const App = (props, ref) => {
               );
             })}
           </div>
+        </div>
+        <div className={style.setbBtnBox}>
+          <Button type='primary' onClick={setStyle}>
+            全局应用风格
+          </Button>
         </div>
       </div>
     </ConfigProvider>

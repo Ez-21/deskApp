@@ -18,7 +18,7 @@ import { QRCode, message } from "antd";
 import { invoke } from "@tauri-apps/api/tauri";
 const Index = () => {
   const [qrcode, setQrcode] = useState({
-    url: "123",
+    url: "https://www.huitangaigc.cn/payment/wechat/pay/success",
     status: "loading",
   });
   const GoPage = useNavigate();
@@ -26,7 +26,7 @@ const Index = () => {
   const judgeLoginHandle = () => {
     judgeLogin().then((res) => {
       console.log(res, "验证登录的数据");
-      if (res.data) {
+      if (res.code==200) {
         sessionStorage.setItem("userInfo", JSON.stringify(res.data));
         GoPage("/index/home", { replace: true });
       }
@@ -106,10 +106,8 @@ const Index = () => {
   const refreshQrcode = () => {
     requestWx();
   };
-  useLayoutEffect(() => {
-    // judgeLoginHandle();
-  }, []);
   useEffect(() => {
+    judgeLoginHandle()
     setWindowSize(987, 572);
     requestWx();
   }, []);
@@ -122,8 +120,8 @@ const Index = () => {
           backgroundPosition: "center",
         }}>
         <div className={style.titleBox}>
-          <img src={getImageUrl("ht")} alt='' />
-          <img src={login} alt='' />
+          <img src={getImageUrl("ht")??''} alt='' />
+          {/* <img src={login ?? ''}  alt='' /> */}
           {/*<div className={style.title}>*/}
           {/*    绘唐创作平台*/}
           {/*</div>*/}

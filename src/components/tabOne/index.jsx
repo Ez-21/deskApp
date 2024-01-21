@@ -10,37 +10,43 @@ import { getSdModel, setSdModel } from "@/api/api.js";
 const App = (props, ref) => {
   const { Option } = Select;
   const [options, setOptions] = useState([]);
-  const [form, setForm] = useState({
+  const [photoNum,setPhotoNum] = useState([1,2,3,4])
+  const [sdForm, setSdForm] = useState({
     modelId: undefined, //sd模型值
     iterationSteps: 20, //迭代步数
     similarity: 0.75, //相似度
+    plotAmount:1          //出图数量
   });
   useImperativeHandle(ref, () => {
     return {
-      form,
+      sdForm,
     };
   });
   // 设置滑动
   const onChangeStep = (newValue) => {
-    form.iterationSteps = newValue;
-    setForm({ ...form });
+    sdForm.iterationSteps = newValue;
+    setSdForm({ ...sdForm });
   };
   // 设置模型下拉
   const changeSelect = (newValue) => {
-    form.modelId = newValue;
-    setForm({ ...form });
+    sdForm.modelId = newValue;
+    setSdForm({ ...sdForm });
   };
   // 设置图生图相似度
   const onChangeLike = (newValue) => {
-    form.similarity = newValue;
-    setForm({ ...form });
+    sdForm.similarity = newValue;
+    setSdForm({ ...sdForm });
   };
+  const changePlotAmount = (newValue)=>{
+    sdForm.plotAmount = newValue;
+    setSdForm({ ...sdForm });
+  }
   // 获取saModel
   const getModel = () => {
     getSdModel("sd-models").then((res) => {
       console.log(res, "sd模型配置");
-      form.modelId = res.data.list[0].value
-      setForm(form)
+      sdForm.modelId = res.data.list[0].value;
+      setSdForm(sdForm);
       setOptions(res.data.list);
     });
   };
@@ -63,7 +69,7 @@ const App = (props, ref) => {
             <div>
               <Select
                 size={"middle"}
-                value={form.modelId}
+                value={sdForm.modelId}
                 placeholder={"请选择"}
                 onChange={changeSelect}
                 style={{
@@ -85,19 +91,19 @@ const App = (props, ref) => {
             <div className={style.slider}>
               <Slider
                 onChange={onChangeStep}
-                value={form.iterationSteps}
+                value={sdForm.iterationSteps}
                 min={20}
                 max={40}
-                defaultValue={form.iterationSteps}></Slider>
+                defaultValue={sdForm.iterationSteps}></Slider>
               <InputNumber
                 min={20}
                 max={40}
-                defaultValue={form.iterationSteps}
-                style={{  
+                defaultValue={sdForm.iterationSteps}
+                style={{
                   margin: "0 16px",
                 }}
                 step={0.1}
-                value={form.iterationSteps}
+                value={sdForm.iterationSteps}
                 onChange={onChangeStep}></InputNumber>
             </div>
           </div>
@@ -110,25 +116,42 @@ const App = (props, ref) => {
               <Slider
                 onChange={onChangeLike}
                 step={0.01}
-                value={form.similarity}
+                value={sdForm.similarity}
                 min={0}
                 max={1}
-                defaultValue={form.similarity}></Slider>
+                defaultValue={sdForm.similarity}></Slider>
               <InputNumber
                 min={0}
                 max={1}
                 style={{
                   margin: "0 16px",
                 }}
-                defaultValue={form.similarity}
+                defaultValue={sdForm.similarity}
                 step={0.01}
-                value={form.similarity}
+                value={sdForm.similarity}
                 onChange={onChangeLike}></InputNumber>
             </div>
           </div>
+          <div className={style.photoNum}>
+            <span>出图数量</span>
+              <Select
+                size={"middle"}
+                value={sdForm.plotAmount}
+                placeholder={"请选择"}
+                onChange={changePlotAmount}
+                style={{
+                  width: "60%",
+                }}>
+                {photoNum.map((item) => (
+                  <Option value={item} key={item}>
+                    {item}
+                  </Option>
+                ))}
+              </Select>
+          </div>
         </div>
         <div className={style.btnBox}>
-          <Button type='primary' onClick={()=>props.setPartOrAllModel()}>
+          <Button type='primary' onClick={() => props.setPartOrAllModel()}>
             全局应用
           </Button>
         </div>

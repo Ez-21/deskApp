@@ -9,8 +9,10 @@ import { getTaskDetial, setVideoFraming, getProgress } from "@/api/api.js";
 import { message } from "antd";
 import { Progress } from "tdesign-react";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
+
 export default function () {
   const [checkAllStatus, setCheckAllStatus] = useState(true);
+  let reCheckIds = [];
   const params = useLocation();
   const goPage = useNavigate();
   const [content, setContent] = useState([]);
@@ -36,17 +38,19 @@ export default function () {
               val = draftIdsArr[index];
               if (index == draftIdsArr.length) {
                 message.success("抽帧任务已全部执行完成！");
-                console.log(timeInter,'抽帧任务全部执行完毕------------定时器');
+                console.log(
+                  timeInter,
+                  "抽帧任务全部执行完毕------------定时器"
+                );
                 clearInterval(timeInter);
                 setTimeTravel(undefined);
-                throw
                 return;
               } else {
                 return quee();
               }
             }
             console.log(status, "状态");
-          }, 3000);
+          }, 2000);
           setTimeTravel(timeInter);
         }
       });
@@ -60,6 +64,7 @@ export default function () {
     if (draftList.length == 0) {
       return message.error("请至少勾选一条草稿！");
     } else {
+      reCheckIds = draftList.map((item) => item.draftId);
       queeTask(draftList);
     }
   };
@@ -125,10 +130,24 @@ export default function () {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        if (reCheckIds.length !== 0) {
+          content.forEach((item) => {
+            if (reCheckIds.includes(item.draftId)) {
+              item.checked = true;
+            } else {
+              item.checked = false;
+            }
+          });
+          setContent([...content], "god");
+        }
       });
   };
   useEffect(() => {
-    getlist(params.state?.taskId);
+    console.log(params, "????????????params");
+    let idsList = params.state?.taskId 
+    getlist(idsList);
     return () => {
       console.log(timeTravel, "定时器？？");
       clearInterval(timeTravel);
@@ -144,6 +163,10 @@ export default function () {
   };
   const changeCheck = (index) => {
     content[index].checked = !content[index].checked;
+    let checkAll = content.every((item) => item.checked == true);
+    if (checkAll) {
+      setCheckAllStatus(true);
+    }
     setContent([...content]);
   };
   return (

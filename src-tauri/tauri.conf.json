@@ -36,7 +36,8 @@
         "setFullscreen": true,
         "close": true,
         "startDragging": true,
-        "setPosition": true
+        "setPosition": true,
+        "setIcon":true
       },
       "shell": {
         "all": false,
@@ -47,6 +48,7 @@
     "bundle": {
       "active": true,
       "identifier": "com.tauri.build",
+      "targets": ["updater","msi","nsis"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -59,6 +61,8 @@
       "center": true,
       "fullscreen": false,
       "resizable": true,
+      "minHeight": 600,
+      "minWidth": 1420,
       "title": "",
       "width": 987,
       "height": 572,

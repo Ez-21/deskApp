@@ -14,10 +14,10 @@
   justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0.45);
-
+   transition: all linear .5s;
   .maskContent {
-    box-sizing: border-box;
-    padding: 40px;
+    // box-sizing: border-box;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -28,6 +28,17 @@
     background: #1F1F1F;
     /* Shadow/默认 */
     box-shadow: 0px 9px 28px 0px rgba(0, 0, 0, 0.2), 0px 6px 16px 0px rgba(0, 0, 0, 0.32), 0px 3px 6px 0px rgba(0, 0, 0, 0.48);
+
+    .createMin {
+      width: 100%;
+      display: flex;
+      justify-content:flex-end;
+      img {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+    }
 
     .createIng {
       margin: 16px 0;
@@ -264,7 +275,7 @@
       margin-right: 5px;
     }
 
-    >div:last-child {
+    .pushImgSet{
       box-sizing: border-box;
       padding: 10px 12px;
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -282,20 +293,23 @@
   color: #D3D3D3;
   border-radius: 2px;
   display: flex;
-  >div{
+
+  >div {
     flex: 1;
   }
+
   .indexBox {
+    z-index: 900;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     background: #262626;
-
+    cursor: pointer;
     .topBox {
       height: 28px;
       display: flex;
-
+      z-index: 6000;
       .indexBoxItem {
         display: grid;
         place-items: center;
@@ -398,13 +412,16 @@
   background: #181818;
   // overflow: hidden;
   overflow-y: scroll;
-  textarea{
-      border: none;
-      background: none;
-      color: white;
-      height: 100%;
-      width: 100%;
-      outline: none;
+
+  textarea {
+    border: none;
+    background: none;
+    color: white;
+    height: 100%;
+    width: 100%;
+    outline: none;
+    padding: 8px;
+    box-sizing: border-box;
   }
 }
 
@@ -455,12 +472,20 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 662px;
+  width: 630px;
   background: #141414;
   color: white;
-  height: 100%;
+  // height: 100%;
   overflow: scroll;
-
+  .settingBox{
+    height: 580px;
+    overflow: scroll;
+    // .picSdBox{
+    // }
+    // .picLoraBox{
+      
+    // }
+  }
   .title {
     box-sizing: border-box;
     padding: 16px 24px;

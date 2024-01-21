@@ -10,15 +10,12 @@ const request = Axios.create({
 request.interceptors.response.use((res) => {
   console.log(res.data.code, "code");
   const code = res.data.code;
-  // if (res.config.url === "/pay/query" && res.data.code === 200) {
-  //    message.success("支付成功！");
-  // }
   if (code == 200) {
     return res.data || res;
   }
   if (code == 500) {
     message.error(res?.data.msg);
-    return;
+    return res.data
   }
   if (res.config.url == "/pay/query") {
     return res.data;

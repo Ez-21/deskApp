@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import style from "./index.module.less";
 import ht from "/public/assets/ht.png";
 import logoText from "/public/assets/hot.png";
+import codeImg from '/public/assets/ysCode.jpg'
 import { message } from "tdesign-react";
 import { useLocation } from "react-router-dom";
 const App = () => {
@@ -63,11 +64,11 @@ const App = () => {
           setTabKey(1);
         }
         break;
-    //   case "/index/gpt":
-    //     {
-    //       setTabKey(2);
-    //     }
-    //     break;
+      //   case "/index/gpt":
+      //     {
+      //       setTabKey(2);
+      //     }
+      //     break;
       case "/index/setting":
         {
           setTabKey(3);
@@ -84,28 +85,33 @@ const App = () => {
   return (
     <div className={style.box}>
       <div className={style.left}>
-        <div className={style.logoBox}>
-          <img src={ht} alt='' />
-          <img src={logoText} alt='' />
+        <div className={style.leftOne}>
+          <div className={style.logoBox}>
+            <img src={ht} alt='' />
+            <img src={logoText} alt='' />
+          </div>
+          <div className={style.changeRoute}>
+            {route.map((item) => (
+              <div
+                style={
+                  tabkey === item.id
+                    ? {
+                        background: "#2E2EFF",
+                        borderRadius: "8px",
+                      }
+                    : null
+                }
+                className={style.ItemBox}
+                key={item.id}
+                onClick={() => ck(item)}>
+                <img src={item.imgUrl} alt='' />
+                <div>{item.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className={style.changeRoute}>
-          {route.map((item) => (
-            <div
-              style={
-                tabkey === item.id
-                  ? {
-                      background: "#2E2EFF",
-                      borderRadius: "8px",
-                    }
-                  : null
-              }
-              className={style.ItemBox}
-              key={item.id}
-              onClick={() => ck(item)}>
-              <img src={item.imgUrl} alt='' />
-              <div>{item.label}</div>
-            </div>
-          ))}
+        <div className={style.leftTwo}>
+           <img src={codeImg} title="扫码进入绘唐小程序" alt="" />
         </div>
       </div>
       <div className={style.right}>

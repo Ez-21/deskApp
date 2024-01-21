@@ -6,6 +6,11 @@ import {
 import { readDir } from "@tauri-apps/api/fs";
 import { useStore } from "@/store";
 import { useNavigate } from "react-router-dom";
+import Ht from "/public/assets/ht.png";
+import styleDes from "/public/dubData/style.ts";
+import roleDes from "/public/dubData/role.ts";
+import voices from "../../public/dubData/voices";
+import { message } from "antd";
 /*
  * @ des 检测用户登录天数
  * */
@@ -83,7 +88,14 @@ function setPosition(x, y) {
 function setWindowCenter() {
   appWindow.center();
 }
-/*
+
+// @des 设置tauri 窗口图标
+
+async function setWindowIcon() {
+  let url = new URL("/public/assets/ht.png", import.meta.url);
+  let data = await appWindow.setIcon(url.pathname);
+  console.log(data, "icon");
+}
 
 /*
 @des 一键生图任务队列
@@ -107,73 +119,126 @@ function queeTask(checkVal, fn) {
   let value = checkVal.find((item) => checkVal[0].storyboardList[0]).id;
   // 获取当前任务下的所有分镜id
   let draft_board_uuid = draft.storyboardList.map((item) => item.id);
+
   return async function gen(res, rej) {
     value = draft_board_uuid[targetNum - 1];
     // 当前执行的草稿任务index
     draftIndex = checkVal.findIndex(
       (val) => JSON.stringify(val) == JSON.stringify(draft)
     );
-    totalNum = draft.storyboardList.length;
+    // 当前分镜总数
+    totalNum = draft.storyboardList.length + 1;
     // 判断中止状态
     let breakStatus = sessionStorage.getItem("breakStatus");
     if (Boolean(+breakStatus)) {
       return rej({
         status: "break",
-      });     //判断单条草稿任务是否已经全部结束
-    } else if (targetNum > totalNum) {
-      // 判断是否全部草稿任务执行完毕
-      if (draftIndex != checkVal.length) {
-        // 如果不是 则 设置数据后开启下一轮草稿任务的队列
-        targetNum = 1;
-        ++draftIndex;
-        if (draftIndex == checkVal.length) {
-          console.log("最后");
-          // 任务执行完毕
-          return res({
-            status: "done",
-          });
-        }
-        draft = checkVal[draftIndex];
-        totalNum = draft.storyboardList.length;
-        console.log(draft, "draft==================");
-        draft_board_uuid = draft.storyboardList.map((item) => item.id);
-        value = draft_board_uuid[targetNum - 1];
-        // 第二轮开始时的默认进度
-        progress = 3;
-        gen(res, rej);
+      }); //判断单条草稿任务是否已经全部结束
+    }
+    if (targetNum == totalNum) {
+      // 判断是否全部当前草稿下的分镜任务执行完毕
+      // 如果是 则 设置数据后开启下一轮草稿任务的队列
+      targetNum = 1;
+      ++draftIndex;
+      // 判断是否已经是最后一个草稿任务 如果是就直接结束
+      if (draftIndex == checkVal.length) {
+        console.log("最后");
+        // 任务执行完毕
         return res({
-          status: "ing",
-          progress,
-          draftName: draft.draftName,
-          totalNum,
-          draftIndex,
+          status: "done",
         });
       }
-    } else if (targetNum <= totalNum) {
-      res({
-        status: "ing",
-        targetId: value,
-        draftName: draft.draftName,
-        totalNum,
-        draftIndex,
-      });
-      await fn(value);
-      ++targetNum;
-      value = draft_board_uuid[targetNum - 1];
-      // 进度
-      progress = ((targetNum / totalNum) * 100).toFixed(2);
-      console.log(progress, "任务进度");
-      // 设置进度
+      draft = checkVal[draftIndex];
+      totalNum = draft.storyboardList.length + 1;
+      draft_board_uuid = draft.storyboardList.map((item) => item.id);
+      // value = draft_board_uuid[targetNum - 1];
+      // 第二轮开始时的默认进度
+      progress = 3;
       gen(res, rej);
       return res({
         status: "ing",
         progress,
-        draftName: draft?.draftName,
+        draftName: draft.draftName,
         totalNum,
         draftIndex,
       });
+    } else if (targetNum < totalNum) {
+      progress = ((targetNum / totalNum) * 100).toFixed(2);
+      res({
+        status: "ing",
+        draftName: draft.draftName,
+        totalNum,
+        draftIndex,
+        progress,
+      });
+      await fn(value)
+        .then((res) => {
+          console.log(res, "生图res");
+          if (res.code == 200) {
+            message.success("生图成功！");
+            return;
+          }
+          if ((res.code = 201)) {
+            message.info("任务排队中...");
+            return;
+          }
+        })
+        .finally(() => {
+          ++targetNum;
+          value = draft_board_uuid[targetNum - 1];
+          // 进度
+          progress = ((targetNum / totalNum) * 100).toFixed(2);
+          console.log(progress, "任务进度");
+          // 设置进度
+          res({
+            status: "ing",
+            progress,
+            draftName: draft?.draftName,
+            totalNum,
+            draftIndex,
+          });
+        });
+      return gen(res, rej);
     }
   };
+}
+
+const getStyleDes = (key) => {
+  return styleDes.find((item) => item.keyword === key);
+};
+
+const getRoleDes = (key) => {
+  return roleDes.find((item) => item.keyword === key);
+};
+
+// 设置音色对应数据
+function getVioceData(
+  params = { word: "", topFlag: "", category: "", gender: "", tag: "" }
+) {
+  const data = voices
+    .filter((v) => v.LocalName.includes(params.word))
+    .filter((v) => v.gender.includes(params.gender))
+    .map((v) => {
+      return {
+        id: v.name,
+        displayName: v.LocalName,
+        name: v.name,
+        isFree: v.LocalName !== "云健",
+        isStar: false,
+        isSupper24K: true,
+        avatar: "",
+        roles: v.VoiceRoleNames.split(",").map((n) => {
+          const des = getRoleDes(n);
+          return { label: des?.word || n, value: n, emoji: des?.emoji };
+        }),
+        styles: v.VoiceStyleNames.split(",").map((n) => {
+          const des = getStyleDes(n);
+          return { label: des?.word || n, value: n, emoji: des?.emoji };
+        }),
+      };
+    });
+
+  return data;
 }
 
 export {
@@ -187,4 +252,6 @@ export {
   readDirectory,
   queeTask,
   checkLoginStatus,
+  setWindowIcon,
+  getVioceData,
 };

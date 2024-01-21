@@ -16,6 +16,8 @@ import {
   getActivate,
   getActivateState,
   getSecretKey,
+  getDiscount,
+  getUserScore
 } from "@/api/api";
 import { Modal, QRCode, message } from "antd";
 import Sort from "../../components/callWordEd/2";
@@ -27,6 +29,7 @@ const App = () => {
   const [secretKey, setSecretKey] = useState("");
   const [activationCode, setActivationCode] = useState("");
   const [activeState, setActiveState] = useState(undefined);
+  const [userScore,setUserScore] = useState()
   const [userStatus, setUserStatus] = useState("");
   const [payWay, setPayWay] = useState({
     wx: "",
@@ -34,17 +37,19 @@ const App = () => {
     wxStatus: "loading",
     zfbStatus: "loading",
     chargeAmount: "",
+    money:'',
   });
   const interval = 1000; // 1秒的毫秒数
   const duration = 3 * 60 * 1000; // 三分钟的毫秒数
   let elapsedTime = 0;
   const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-  const payNum = [10.0, 20.0, 50.0, 100.0, 300.0, 500.0];
-  const openPay = (data) => {
+  const [payNumber, setPayNumber] = useState([]);
+  const openPay = (item) => {
     payWay.wx = "";
     payWay.zfb = "";
     SetPayModalShow(true);
-    payWay.chargeAmount = data;
+    payWay.chargeAmount = item.interval[0]
+    payWay.money = (item.interval[0]*item.discount)/100;
     setPayWay({ ...payWay });
   };
   // 生成微信二维码
@@ -106,6 +111,16 @@ const App = () => {
     setActivationCode("");
     SetGetModalShow(false);
   };
+  // 获取折扣信息
+  const getDiscountData = () => {
+    getDiscount().then((res) => {
+      console.log(res.data, "折扣信息");
+      if(res.data.length!==0){
+        res.data.shift()
+      }
+      setPayNumber(res.data);
+    });
+  };
   // 去登录
   const gologin = () => {
     goPage("/");
@@ -163,8 +178,14 @@ const App = () => {
   const getActivateHandle = () => {
     getActivateState().then((res) => {
       console.log(res, "查询状态res");
-      if (res.code==200) {
+      if (res.code == 200) {
         sessionStorage.setItem("userActiveStatus", "1");
+        getUserScore().then(res=>{
+          console.log('用户积分',res);
+          if(res.code==200){
+            setUserScore(res.data.score)
+          }
+        })
         setActiveState(true);
       } else {
         setActiveState(false);
@@ -173,6 +194,7 @@ const App = () => {
     });
   };
   useEffect(() => {
+    getDiscountData();
     getActivateHandle();
     getKey();
   }, []);
@@ -189,12 +211,13 @@ const App = () => {
           <div className={style.payConent}>
             <div className={style.one}>
               <div>购买详情：</div>
-              <div>算球12</div>
+              <div>积分充值</div>
             </div>
             <div className={style.two}>
               <div>实付金额：</div>
               <div>
-                <span>￥</span>2000
+                <span>￥</span>
+                {payWay.money}
               </div>
             </div>
             <div className={style.three}>
@@ -265,6 +288,7 @@ const App = () => {
             <input
               type='text'
               value={activationCode}
+              defaultValue={activationCode}
               onChange={(e) => setActivationCode(e.target.value)}
             />
             <div className={style.getBtn} onClick={activate}>
@@ -298,11 +322,11 @@ const App = () => {
               <div className={style.keyCode}>本机机器码：{secretKey}</div>
             </div>
           </div>
-          {!activeState ? (
+          {/* {!activeState ? (
             <div className={style.get} onClick={openGet}>
               立即激活
             </div>
-          ) : null}
+          ) : null} */}
           {userInfo ? (
             <div className={style.quit} onClick={quit}>
               <img src={Quit} alt='' />
@@ -317,7 +341,7 @@ const App = () => {
           <img src={PushMoney} alt='' />
           <div className={style.lostMone}>
             <div>积分余额</div>
-            <div>0.00</div>
+            <div>{userScore}</div>
           </div>
         </div>
         <div className={style.recharge}>
@@ -326,14 +350,14 @@ const App = () => {
             充值
           </div>
           <div className={style.moneyItem}>
-            {payNum.map((item) => (
+            {payNumber.map((item) => (
               <div
                 className={style.itemBox}
                 onClick={() => openPay(item)}
-                key={item}>
-                <div className={style.itemNumber}>200积分</div>
+                key={item.discount}>
+                <div className={style.itemNumber}>{item.interval[0] * 100}</div>
                 <div>
-                  ￥ <span>{item}</span>
+                  ￥ <span>{(item.interval[0] * item.discount) / 100}</span>
                 </div>
               </div>
             ))}
